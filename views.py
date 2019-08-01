@@ -7,8 +7,8 @@ import datetime
 FIJI_DIR = "/usr/local/share/Fiji.app/"
 FIJI_BIN = FIJI_DIR + "ImageJ-linux64"
 
-FIJI_DIR = "/Users/bene/Fiji.app/"
-FIJI_BIN = FIJI_DIR + "Contents/MacOS/ImageJ-macosx"
+# FIJI_DIR = "/Users/bene/Fiji.app/"
+# FIJI_BIN = FIJI_DIR + "Contents/MacOS/ImageJ-macosx"
 
 
 
@@ -102,8 +102,8 @@ function getAnimationFileName() {
 	return "''' + basename + '''.animation.txt";
 }
 
-// run("T1 Head (2.4M, 16-bits)");
-open("/Users/bene/t1-head.tif");
+run("T1 Head (2.4M, 16-bits)");
+// open("/Users/bene/t1-head.tif");
 title = getTitle();
 
 
