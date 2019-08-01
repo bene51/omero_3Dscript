@@ -1,0 +1,76 @@
+<html>
+<head>
+  <meta charset="UTF-8">
+  <title>3DScript</title>
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.8.2/jquery.min.js"></script>
+  <script type="text/javascript">
+    function resizeit() {
+      console.log
+      var targetVideoWidth = $("#videoContainer")[0].clientWidth;
+      var targetVideoHeight = $("#videoContainer")[0].clientHeight;
+      console.log("tgtw = " + targetVideoWidth + " tgth = " + targetVideoHeight);
+      var targetAspect = targetVideoWidth / targetVideoHeight;
+
+      var previews = $("#preview");
+      if(previews.length > 0) {
+        var preview = previews[0];
+        preview.addEventListener("loadedmetadata", function(e) {
+          var videoWidth = this.videoWidth;
+          var videoHeight = this.videoHeight;
+          var aspect = videoWidth / videoHeight;
+          if(aspect > targetAspect) {
+            // keep width and let hight be adjusted automatically
+            preview.width = targetVideoWidth;
+          }
+          else {
+            // keep height and let width be adjusted automatically
+            preview.height = targetVideoHeight;
+          }
+          console.log("videoWidth = " + videoWidth);
+          console.log("videoHeight = " + videoHeight);
+  
+          console.log("videoWidth/videoHeight = " + (videoWidth / videoHeight));
+        });
+      }
+    }
+  
+    $(document).ready(function() {
+      resizeit();
+    });
+
+    window.onresize = resizeit;
+  </script>
+</head>
+<body>
+  <h1>{{ image_name }}</h1>
+
+  {{ macro }}
+  {{ outfile }}
+
+<div id="videoContainer" style="width: 600px; height: 450px; background-color: black; margin-left: auto; margin-right: auto;">
+  {% if annotationId %}
+  <video style="margin-left: auto; margin-right: auto; display: block; position: relative; top: 50%; transform: translateY(-50%);" id="preview" controls>
+    <source src="/webclient/annotation/{{annotationId}}" type="video/mp4">
+    Your browser doesn't support this video.
+  </video>
+  {% endif %}
+</div>
+  {% comment %}
+  {% for z in z_indexes %}
+  <img src="{% url 'webgateway.views.render_image' imageId z 0 %}"
+    style="max-width: 200px; max-height:200px"/>
+  {% endfor %}
+  {% endcomment %}
+  <form style="width:600px; margin-left: auto; margin-right: auto;" action="{% url '3Dscript_render' %}" method="get">
+    {% spaceless %}
+    <textarea style="width: 600px; height: 450px;" name="script">{% if s %}{{ s }}{% else %}
+At frame 0 zoom by a factor of 0.9
+From frame 0 to frame 200 rotate by 360 degrees horizontally
+{% endif %}</textarea>
+    {% endspaceless %}
+
+  <div>
+    <button name="render" value="">Render</button></div>
+  </form>
+</body>
+</html>
