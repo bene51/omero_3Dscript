@@ -55,10 +55,10 @@ def render3D(request, conn=None, **kwargs):
      file_ann = conn.createFileAnnfromLocalFile(mp4file, mimetype="video/mp4", ns=namespace, desc=None)
      image.linkAnnotation(file_ann)
      aId = file_ann.getId()
-     os.remove(avifile)
-     os.remove(mp4file)
-     os.remove(animationfile)
-     os.remove(macrofile)
+     # os.remove(avifile)
+     # os.remove(mp4file)
+     # os.remove(animationfile)
+     # os.remove(macrofile)
      # aId = 107 # for now put manually, because we need an mp4
      return render(request, '3Dscript/index.html',
            {'imageId': image_id, 'image_name': image_name,
