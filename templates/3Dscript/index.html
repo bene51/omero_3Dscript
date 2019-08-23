@@ -2,7 +2,10 @@
 <head>
   <meta charset="UTF-8">
   <title>3DScript</title>
-  <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.8.2/jquery.min.js"></script>
+  <link rel="stylesheet" href="https://code.jquery.com/ui/1.12.1/themes/base/jquery-ui.css">
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
+  <script src="https://code.jquery.com/ui/1.12.1/jquery-ui.min.js"></script>
+  <!-- See https://docs.openmicroscopy.org/omero/5.4.9/developers/Web/CreateApp.html -->
   <script type="text/javascript">
     function resizeit() {
       console.log
@@ -33,9 +36,29 @@
         });
       }
     }
+
+    function setprogress() {
+      $.ajax({
+        // url: '/omero_3dscript/getProgress',
+        url: '/omero_3dscript/startRendering',
+        data: {
+          script: 'bla'
+        },
+        dataType: 'json',
+        success: function(data) {
+          // alert(data['progress']);
+          $("#progressbar").progressbar({
+            value: data.progress
+          });
+        }
+      });
+    }
   
     $(document).ready(function() {
       resizeit();
+      $("#progressbar").progressbar({
+        value: 67,
+      });
     });
 
     window.onresize = resizeit;
@@ -61,6 +84,9 @@
     style="max-width: 200px; max-height:200px"/>
   {% endfor %}
   {% endcomment %}
+  <div style="width: 600px; margin-left: auto; margin-right: auto;" id=progressbar>
+    <div class="progress-label">Loading...</div>
+  </div>
   <form style="width:600px; margin-left: auto; margin-right: auto;" action="{% url '3Dscript_render' %}" method="get">
     {% spaceless %}
     <textarea style="width: 600px; height: 450px;" name="script">{% if s %}{{ s }}{% else %}
@@ -70,7 +96,9 @@ From frame 0 to frame 200 rotate by 360 degrees horizontally
     {% endspaceless %}
 
   <div>
-    <button name="render" value="">Render</button></div>
+    <button name="render" value="">Render</button>
+  </div>
   </form>
+  <button name="bla" value="" onclick="setprogress()">bla</button>
 </body>
 </html>

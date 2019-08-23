@@ -1,5 +1,6 @@
 from omeroweb.webclient.decorators import login_required
 from django.shortcuts import render
+from django.http import JsonResponse, HttpResponse
 import tempfile
 import os
 import datetime
@@ -26,6 +27,44 @@ def index(request, conn=None, **kwargs):
      return render(request, '3Dscript/index.html',
            {'imageId': image_id, 'image_name': image_name,
             'z_indexes': z_indexes})
+
+@login_required()
+def getProgress(request, conn=None, **kwargs):
+     """ Shows a subset of Z-planes for an image """
+     return JsonResponse({'progress': 50})
+
+@login_required()
+def startRendering(request, conn=None, **kwargs):
+     """ Shows a subset of Z-planes for an image """
+     image_id = 1
+     image = conn.getObject("Image", image_id)
+     image_name = image.getName()
+     user = conn.getUser().getName();
+     basename = os.path.join(tempfile.gettempdir(), user + "-" + datetime.datetime.now().strftime("%Y-%m-%d-%H-%M-%S"))
+     imagepath = extract_image(conn, image)
+     s = request.GET['script']
+     s = conn
+     writeAnimationFile(s, basename)
+     # avifile = basename + ".avi"
+     # mp4file = convertToMP4(avifile);
+     # namespace = "oice/3Dscript"
+     # gid = image.getDetails().getGroup().getId()
+     # conn.SERVICE_OPTS.setOmeroGroup(gid)
+     # file_ann = conn.createFileAnnfromLocalFile(animationfile, mimetype="text/plain", ns=namespace, desc=None)
+     # image.linkAnnotation(file_ann)
+     # file_ann = conn.createFileAnnfromLocalFile(mp4file, mimetype="video/mp4", ns=namespace, desc=None)
+     # image.linkAnnotation(file_ann)
+     # aId = file_ann.getId()
+     # # os.remove(avifile)
+     # # os.remove(mp4file)
+     # # os.remove(animationfile)
+     # # os.remove(macrofile)
+     # # aId = 107 # for now put manually, because we need an mp4
+     # return render(request, '3Dscript/index.html',
+     #       {'imageId': image_id, 'image_name': image_name,
+     #        'z_indexes': z_indexes, 's': s, 'annotationId' : aId, 'macro' : macrofile, 'outfile' : mp4file})
+     # TODO dont return progress here
+     return JsonResponse({'progress': 50})
 
 @login_required()
 def render3D(request, conn=None, **kwargs):
@@ -121,6 +160,11 @@ def run3Dscript(macrofile, outfile):
      p.wait()
      out.close()
      err.close()
+
+def writeAnimationFile(script, basename):
+     animationFile = basename + ".animation.txt"
+     with open(animationFile, 'w') as f:
+          f.write(script)
 
 def makeMacro(script, basename, path, nChannels, nSlices, nFrames):
      s = '''
