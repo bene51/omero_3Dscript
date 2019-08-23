@@ -40,5 +40,5 @@ def run(basename, imageid, w, h):
 			break
 		time.sleep(0.1)
 
-
-run('/tmp/bschmid-2019-08-21-10-07-14', 1, 256, 256)
+basename = '/tmp/bschmid-2019-08-23-09-28-56'
+run(basename, 1, 256, 256)
