@@ -42,7 +42,8 @@
         // url: '/omero_3dscript/getProgress',
         url: '/omero_3dscript/startRendering',
         data: {
-          script: 'bla'
+          // script: 'bla'
+          script: $("#script")[0].value
         },
         dataType: 'json',
         success: function(data) {
@@ -89,7 +90,7 @@
   </div>
   <form style="width:600px; margin-left: auto; margin-right: auto;" action="{% url '3Dscript_render' %}" method="get">
     {% spaceless %}
-    <textarea style="width: 600px; height: 450px;" name="script">{% if s %}{{ s }}{% else %}
+    <textarea id="script" style="width: 600px; height: 450px;" name="script">{% if s %}{{ s }}{% else %}
 At frame 0 zoom by a factor of 0.9
 From frame 0 to frame 200 rotate by 360 degrees horizontally
 {% endif %}</textarea>
