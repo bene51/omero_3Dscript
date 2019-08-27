@@ -2,10 +2,15 @@
 <head>
   <meta charset="UTF-8">
   <title>3DScript</title>
-  <link rel="stylesheet" href="https://code.jquery.com/ui/1.12.1/themes/base/jquery-ui.css">
-  <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
-  <script src="https://code.jquery.com/ui/1.12.1/jquery-ui.min.js"></script>
+  <!--link rel="stylesheet" href="https://code.jquery.com/ui/1.12.1/themes/base/jquery-ui.css"-->
+  <!--script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script-->
+  <!--script src="https://code.jquery.com/ui/1.12.1/jquery-ui.min.js"></script-->
   <!-- See https://docs.openmicroscopy.org/omero/5.4.9/developers/Web/CreateApp.html -->
+  <!-- jQuery -->
+  {% include "webgateway/base/includes/script_src_jquery.html" %}
+
+  <!-- jQuery UI - includes js and css -->
+  {% include "webgateway/base/includes/jquery-ui.html" %}
   <script type="text/javascript">
     function resizeit() {
       console.log
@@ -37,29 +42,74 @@
       }
     }
 
-    function setprogress() {
+    function startRendering() {
       $.ajax({
-        // url: '/omero_3dscript/getProgress',
         url: '/omero_3dscript/startRendering',
         data: {
-          // script: 'bla'
           script: $("#script")[0].value
         },
         dataType: 'json',
         success: function(data) {
-          // alert(data['progress']);
-          $("#progressbar").progressbar({
-            value: data.progress
-          });
+          var basename = data.basename;
+          console.log(data.sessionId); // TODO remove again
+          updateState(basename);
         }
       });
     }
-  
+
+    function updateState(basename) {
+      setTimeout(function myTimer() {
+        $.ajax({
+          url: '/omero_3dscript/getStateAndProgress',
+          data: {
+            basename: basename
+          },
+          dataType: 'json',
+          success: function(data) {
+            var pbar = $('#bar');
+            console.debug(pbar[0].innerHTML);
+            pbar.width(data.progress + '%');
+            pbar[0].innerHTML = data.state;
+            console.debug(pbar);
+            console.debug('state = ' + data.state);
+            if(data.state.startsWith('ERROR')) {
+              // do nothing
+            }
+            else if (data.state.startsWith('FINISHED')) {
+              createAnnotation(basename);
+            }
+            else {
+              updateState(basename);
+            }
+          }
+        });
+      }, 30);
+    }
+
+    function createAnnotation(basename) {
+      $.ajax({
+          url: '/omero_3dscript/createAnnotation',
+          data: {
+            basename: basename,
+            imageId: 1 // TODO replace with real id
+          },
+          dataType: 'json',
+          success: function(data) {
+            annotationId = data.annotationId;
+            console.debug('annotationId = ' + annotationId);
+            $('#videoContainer')[0].innerHTML = `
+<video style="margin-left: auto; margin-right: auto; display: block; position: relative; top: 50%; transform: translateY(-50%);" id="preview" controls>
+  <source src="/webclient/annotation/${annotationId}" type="video/mp4">
+  Your browser doesn't support this video.
+</video>`.trim();
+            resizeit();
+          }
+      });
+    }
+
     $(document).ready(function() {
       resizeit();
-      $("#progressbar").progressbar({
-        value: 67,
-      });
+      $("#bar").width('20%');
     });
 
     window.onresize = resizeit;
@@ -71,7 +121,7 @@
   {{ macro }}
   {{ outfile }}
 
-<div id="videoContainer" style="width: 600px; height: 450px; background-color: black; margin-left: auto; margin-right: auto;">
+<div id="videoContainer" style="color: white; width: 600px; height: 450px; background-color: black; margin-left: auto; margin-right: auto;">
   {% if annotationId %}
   <video style="margin-left: auto; margin-right: auto; display: block; position: relative; top: 50%; transform: translateY(-50%);" id="preview" controls>
     <source src="/webclient/annotation/{{annotationId}}" type="video/mp4">
@@ -85,8 +135,9 @@
     style="max-width: 200px; max-height:200px"/>
   {% endfor %}
   {% endcomment %}
-  <div style="width: 600px; margin-left: auto; margin-right: auto;" id=progressbar>
-    <div class="progress-label">Loading...</div>
+
+  <div style="border-radius: 3px; width: 600px; margin-left: auto; margin-right: auto; margin-top: 5px; margin-bottom: 5px; background-color: #ddd;" id="progress">
+    <div id="bar" style="border-radius: 3px; background-color: #4caf50; height: 20px; text-align: center; line-height: 20px; color: #fff; padding-left: 0px; width: 10%;">bla</div>
   </div>
   <form style="width:600px; margin-left: auto; margin-right: auto;" action="{% url '3Dscript_render' %}" method="get">
     {% spaceless %}
@@ -95,11 +146,10 @@ At frame 0 zoom by a factor of 0.9
 From frame 0 to frame 200 rotate by 360 degrees horizontally
 {% endif %}</textarea>
     {% endspaceless %}
-
   <div>
     <button name="render" value="">Render</button>
   </div>
   </form>
-  <button name="bla" value="" onclick="setprogress()">bla</button>
+  <button name="bla" value="" onclick="startRendering()">Render</button>
 </body>
 </html>
