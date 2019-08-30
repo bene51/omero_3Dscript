@@ -35,13 +35,15 @@ def send(msg):
 def startRendering(host, sessionid, basename, imageid, w, h):
 	send('render ' + host + ' ' + sessionid + ' ' + basename + ' ' + str(imageid) + ' ' + str(w) + ' ' + str(h) + '\n')
 
-def getState(basename):
-	return send('getstate ' + basename + '\n')
+def getStateAndProgress(basename):
+	state = send('getstate ' + basename + '\n')
+	progress = float(send('getprogress ' + basename + '\n'))
+	return state, progress 
 
 def run(host, sessionid, basename, imageid, w, h):
 	startRendering(host, sessionid, basename, imageid, w, h)
 	while True:
-		resp = getState(basename)
+		resp, prog = getStateAndProgress(basename)
 		if resp and resp.startswith('FINISHED'):
 			break
 		if resp and resp.startswith('ERROR'):

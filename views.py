@@ -33,9 +33,8 @@ def index(request, conn=None, **kwargs):
 @login_required()
 def getStateAndProgress(request, conn=None, **kwargs):
      basename = request.GET['basename']
-     state = fiji.getState(basename)
-     progress = 50 #TOOD fiji.getProgress
-     return JsonResponse({'state': state, 'progress': 50})
+     state, progress = fiji.getStateAndProgress(basename)
+     return JsonResponse({'state': state, 'progress': progress})
 
 @login_required()
 def createAnnotation(request, conn=None, **kwargs):
@@ -76,7 +75,9 @@ def startRendering(request, conn=None, **kwargs):
 
           sessionId = conn.c.getSessionId()
           # sessionId = conn._getSessionId()
-          fiji.startRendering('10.210.16.80', sessionId, basename, image_id, 256, 256) #TODO replace 256
+          tgtWidth = request.GET['targetWidth']
+          tgtHeight = request.GET['targetHeight']
+          fiji.startRendering('10.210.16.80', sessionId, basename, image_id, tgtWidth, tgtHeight)
           # avifile = basename + ".avi"
           # mp4file = convertToMP4(avifile);
           # namespace = "oice/3Dscript"

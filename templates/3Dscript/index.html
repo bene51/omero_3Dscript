@@ -2,15 +2,19 @@
 <head>
   <meta charset="UTF-8">
   <title>3DScript</title>
-  <!--link rel="stylesheet" href="https://code.jquery.com/ui/1.12.1/themes/base/jquery-ui.css"-->
-  <!--script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script-->
-  <!--script src="https://code.jquery.com/ui/1.12.1/jquery-ui.min.js"></script-->
+  <link rel="stylesheet" href="https://code.jquery.com/ui/1.12.1/themes/base/jquery-ui.css">
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
+  <script src="https://code.jquery.com/ui/1.12.1/jquery-ui.min.js"></script>
+  {% comment %}
   <!-- See https://docs.openmicroscopy.org/omero/5.4.9/developers/Web/CreateApp.html -->
   <!-- jQuery -->
-  {% include "webgateway/base/includes/script_src_jquery.html" %}
-
+  <!--{% include "webgateway/base/includes/script_src_jquery.html" %}-->
   <!-- jQuery UI - includes js and css -->
-  {% include "webgateway/base/includes/jquery-ui.html" %}
+  <!--{% include "webgateway/base/includes/jquery-ui.html" %}-->
+  <!--link rel="stylesheet" href="jquery-ui-1.12.1/jquery-ui.css"-->
+  <!--script src="omero_3dscript/jquery-3.4.1.min.js"></script-->
+  <!--script src="omero_3dscript/jquery-ui-1.12.1/jquery-ui.js"></script-->
+  {% endcomment %}
   <script type="text/javascript">
     function resizeit() {
       console.log
@@ -46,15 +50,32 @@
       $.ajax({
         url: '/omero_3dscript/startRendering',
         data: {
-          script: $("#script")[0].value
+          script: $("#script")[0].value,
+          targetWidth: $("#tgtWidth")[0].value,
+          targetHeight: $("#tgtHeight")[0].value
         },
         dataType: 'json',
         success: function(data) {
           var basename = data.basename;
           console.log(data.sessionId); // TODO remove again
+          $('#pbar').width(0 + '%');
           updateState(basename);
         }
       });
+    }
+
+    function setStateAndProgress(state, progress) {
+      var pbar = $('#bar');
+      if(progress >= 0)
+        // pbar.width(progress + '%');
+        pbar.stop().animate({"width": progress + '%'}, 100); // .queue(function(){});
+      if(state != null) {
+        pbar[0].innerHTML = state;
+        if(state.startsWith('ERROR'))
+          pbar.css({"background-color":"red", "color":"black"});
+        else
+          pbar.css({"background-color":"#4caf50", "color":"white"});
+      }
     }
 
     function updateState(basename) {
@@ -66,19 +87,15 @@
           },
           dataType: 'json',
           success: function(data) {
-            var pbar = $('#bar');
-            console.debug(pbar[0].innerHTML);
-            pbar.width(data.progress + '%');
-            pbar[0].innerHTML = data.state;
-            console.debug(pbar);
-            console.debug('state = ' + data.state);
+            console.debug(100 * data.progress);
             if(data.state.startsWith('ERROR')) {
-              // do nothing
+              setStateAndProgress('ERROR', 100 * data.progress);
             }
             else if (data.state.startsWith('FINISHED')) {
               createAnnotation(basename);
             }
             else {
+              setStateAndProgress(data.state, 100 * data.progress);
               updateState(basename);
             }
           }
@@ -87,6 +104,7 @@
     }
 
     function createAnnotation(basename) {
+      setStateAndProgress('CREATE ATTACHMENT', 95);
       $.ajax({
           url: '/omero_3dscript/createAnnotation',
           data: {
@@ -103,16 +121,131 @@
   Your browser doesn't support this video.
 </video>`.trim();
             resizeit();
+            setStateAndProgress('FINISHED', 100);
           }
       });
     }
 
-    $(document).ready(function() {
-      resizeit();
-      $("#bar").width('20%');
+    $(function() {
+      var dialog, form,
+      tgtWidth = $("#tgtWidth"),
+      tgtHeight = $("#tgtHeight"),
+      bbswitch = $("#bbswitch"),
+      bbcolor = $("#bbcolor"),
+      bblinewidth = $("#bblinewidth"),
+      sbswitch = $("#sbswitch"),
+      sbcolor = $("#sbcolor"),
+      sblinewidth = $("#sblinewidth"),
+      sblength = $("#sblength"),
+      
+      allFields = $( [] ).
+        add(tgtWidth).
+        add(tgtHeight).
+        add(bbswitch).
+        add(bbcolor).
+        add(bblinewidth).
+        add(sbswitch).
+        add(sbcolor).
+        add(sblinewidth).
+        add(sblength);
+      tips = $( ".validateTips" );
+
+      function updateTips( t ) {
+        tips
+          .text( t )
+          .addClass( "ui-state-highlight" );
+        setTimeout(function() {
+          tips.removeClass( "ui-state-highlight", 1500 );
+        }, 500 );
+      }
+
+      function checkNumber(o, n, min) {
+        var v = 0;
+        var valid = true;
+        try {
+          v = parseFloat(o.val());
+        } catch(error) {
+          valid = false;
+        }
+        valid = valid && v >= min;
+
+        if(!valid) {
+          o.addClass("ui-state-error");
+          updateTips(n + " must be a number >= " + min);
+        }
+        return valid;
+      }
+
+      function checkInteger(o, n, min) {
+        var v = 0;
+        var valid = true;
+        try {
+          v = parseInt(o.val());
+        } catch(error) {
+          valid = false;
+        }
+        valid = valid && v >= min;
+
+        if(!valid) {
+          o.addClass("ui-state-error");
+          updateTips(n + " must be a whole number >= " + min);
+        }
+        return valid;
+      }
+
+      function verify() {
+        var valid = true;
+        allFields.removeClass( "ui-state-error" );
+   
+        valid = valid && checkInteger(tgtWidth, "Output width", 50);
+        valid = valid && checkInteger(tgtHeight, "Output height", 50);
+        valid = valid && checkNumber(bblinewidth, "Bounding box width", 0);
+        valid = valid && checkNumber(sblinewidth, "Scalebar width", 0);
+        valid = valid && checkNumber(sblength, "Scalebar length", 0);
+
+        if(valid)
+          dialog.dialog("close");
+   
+        return valid;
+      }
+
+      dialog = $( "#dialog-form" ).dialog({
+        autoOpen: false,
+        height: 400,
+        width: 600,
+        modal: true,
+        show: {
+          effect: "fade",
+          duration: 500
+        },
+        hide: {
+          effect: "fade",
+          duration: 500
+        },
+        buttons: {
+          "Close": verify,
+          Cancel: function() {
+            form[ 0 ].reset();
+            dialog.dialog( "close" );
+          }
+        },
+        close: function() {
+          updateTips("");
+          allFields.removeClass( "ui-state-error" );
+        }
+      });
+
+      form = dialog.find("form").on("submit", function(event) {
+        event.preventDefault();
+        verify();
+      });
+
+      $("#settings").on( "click", function() {
+        dialog.dialog( "open" );
+      });
     });
 
-    window.onresize = resizeit;
+
   </script>
 </head>
 <body>
@@ -137,19 +270,81 @@
   {% endcomment %}
 
   <div style="border-radius: 3px; width: 600px; margin-left: auto; margin-right: auto; margin-top: 5px; margin-bottom: 5px; background-color: #ddd;" id="progress">
-    <div id="bar" style="border-radius: 3px; background-color: #4caf50; height: 20px; text-align: center; line-height: 20px; color: #fff; padding-left: 0px; width: 10%;">bla</div>
+    <div id="bar" style="border-radius: 3px; background-color: #4caf50; height: 20px; text-align: center; line-height: 20px; color: #fff; padding-left: 0px; width: 1%;"> </div>
   </div>
-  <form style="width:600px; margin-left: auto; margin-right: auto;" action="{% url '3Dscript_render' %}" method="get">
+
+  <div style="width:600px; margin-left: auto; margin-right: auto;">
     {% spaceless %}
-    <textarea id="script" style="width: 600px; height: 450px;" name="script">{% if s %}{{ s }}{% else %}
+    <textarea id="script" style="width: 600px; height: 250px;" name="script">{% if s %}{{ s }}{% else %}
 At frame 0 zoom by a factor of 0.9
 From frame 0 to frame 200 rotate by 360 degrees horizontally
 {% endif %}</textarea>
     {% endspaceless %}
   <div>
-    <button name="render" value="">Render</button>
+    <button name="startRendering" value="" onclick="startRendering()">Render</button>
+    <button name="settings" id="settings" value="">Settings</button>
   </div>
+  </div>
+
+
+<style>
+#dialog-form form {
+  font-size: 0.8em;
+}
+
+#dialog-form form fieldset {
+  margin-top: 5px;
+}
+
+#dialog-form form fieldset legend {
+  font-size: 0.8em;
+}
+#dialog-form .number {
+  width: 5em;
+}
+#dialog-form .leftmargin {
+  margin-left: 20px;
+}
+#dialog-form .rightmargin {
+  margin-right: 20px;
+}
+</style>
+
+
+<div id="dialog-form" title="Settings">
+  <p class="validateTips"> </p>
+ 
+  <form>
+    <fieldset>
+      <legend>Output Size</legend>
+      <input type="number" name="tgtWidth" id="tgtWidth" value="600" class="number ui-widget-content ui-corner-all">
+      <span class="leftmargin rightmargin">x</span>
+      <input type="number" name="tgtHeight" id="tgtHeight" value="450" class="number ui-widget-content ui-corner-all"><br>
+    </fieldset>
+    <fieldset>
+      <legend>Bounding Box</legend>
+      <input type="checkbox" name="bbswitch" id="bbswitch" value="BoundingBox" checked>Visible
+      <label for="bbcolor" class="leftmargin">Color</label>
+      <input type="color" id="bbcolor" name="bbcolor" value="#aaaaaa" style="vertical-align: bottom;" class="ui-widget-content ui-corner-all">
+      <label class="leftmargin" for="bblinewidth">Line width</label>
+      <input type="number" name="bblinewidth" id="bblinewidth" value="1.0" min="0.0" step="0.5" class="number ui-widget-content ui-corner-all">
+    </fieldset>
+    <fieldset>
+      <legend>Scalebar</legend>
+      <input type="checkbox" name="sbswitch" id="sbswitch" value="ScaleBar" checked>Visible
+      <label for="sbcolor" class="leftmargin">Color</label>
+      <input type="color" id="sbcolor" name="sbcolor" value="#aaaaaa" style="vertical-align: bottom;" class="ui-widget-content ui-corner-all">
+      <label class="leftmargin" for="sblinewidth">Line width</label>
+      <input type="number" name="sblinewidth" id="sblinewidth" value="1.0" min="0.0" step="0.5" class="number ui-widget-content ui-corner-all">
+      <label class="leftmargin" for="sblength">Length</label>
+      <input type="number" name="sblength" id="sblength" value="100" min="0.0" step="0.1" class="number ui-widget-content ui-corner-all">
+ 
+      <!--input type="password" name="password" id="password" value="xxxxxxx" class="text ui-widget-content ui-corner-all"-->
+      <!-- Allow form submission with keyboard without duplicating the dialog button -->
+      <input type="submit" tabindex="-1" style="position:absolute; top:-1000px">
+    </fieldset>
   </form>
-  <button name="bla" value="" onclick="startRendering()">Render</button>
+</div>
+
 </body>
 </html>
