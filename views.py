@@ -7,6 +7,7 @@ import datetime
 import shutil
 from pytiff import PyTiff
 import traceback
+import fiji
 
 # FIJI_DIR = "/usr/local/share/Fiji.app/"
 # FIJI_BIN = FIJI_DIR + "ImageJ-linux64"
@@ -30,13 +31,37 @@ def index(request, conn=None, **kwargs):
             'z_indexes': z_indexes})
 
 @login_required()
-def getProgress(request, conn=None, **kwargs):
-     """ Shows a subset of Z-planes for an image """
-     return JsonResponse({'progress': 50})
+def getStateAndProgress(request, conn=None, **kwargs):
+     basename = request.GET['basename']
+     state, progress = fiji.getStateAndProgress(basename)
+     return JsonResponse({'state': state, 'progress': progress})
+
+@login_required()
+def createAnnotation(request, conn=None, **kwargs):
+     basename = request.GET['basename']
+     imageid = request.GET['imageId']
+     image = conn.getObject("Image", imageid)
+     mp4file = basename + '.mp4'
+     animationfile = basename + '.animation.txt'
+     namespace = "oice/3Dscript"
+     gid = image.getDetails().getGroup().getId()
+     conn.SERVICE_OPTS.setOmeroGroup(gid)
+     file_ann = conn.createFileAnnfromLocalFile(animationfile, mimetype="text/plain", ns=namespace, desc=None)
+     image.linkAnnotation(file_ann)
+     file_ann = conn.createFileAnnfromLocalFile(mp4file, mimetype="video/mp4", ns=namespace, desc=None)
+     image.linkAnnotation(file_ann)
+     aId = file_ann.getId()
+     # os.remove(avifile)
+     # os.remove(mp4file)
+     # os.remove(animationfile)
+     # os.remove(macrofile)
+     return JsonResponse({'annotationId': aId})
+
 
 @login_required()
 def startRendering(request, conn=None, **kwargs):
      """ Shows a subset of Z-planes for an image """
+     basename = None
      try:
           image_id = 1
           image = conn.getObject("Image", image_id)
@@ -44,10 +69,15 @@ def startRendering(request, conn=None, **kwargs):
           user = conn.getUser().getName();
           basename = os.path.join(tempfile.gettempdir(), user + "-" + datetime.datetime.now().strftime("%Y-%m-%d-%H-%M-%S"))
           basename = "/tmp/" + user + "-" + datetime.datetime.now().strftime("%Y-%m-%d-%H-%M-%S")
-          imagepath = extract_image(conn, image)
+          # imagepath = extract_image(conn, image)
           s = request.GET['script']
-          # s = conn
           writeAnimationFile(s, basename)
+
+          sessionId = conn.c.getSessionId()
+          # sessionId = conn._getSessionId()
+          tgtWidth = request.GET['targetWidth']
+          tgtHeight = request.GET['targetHeight']
+          fiji.startRendering('10.210.16.80', sessionId, basename, image_id, tgtWidth, tgtHeight)
           # avifile = basename + ".avi"
           # mp4file = convertToMP4(avifile);
           # namespace = "oice/3Dscript"
@@ -66,12 +96,11 @@ def startRendering(request, conn=None, **kwargs):
           # return render(request, '3Dscript/index.html',
           #       {'imageId': image_id, 'image_name': image_name,
           #        'z_indexes': z_indexes, 's': s, 'annotationId' : aId, 'macro' : macrofile, 'outfile' : mp4file})
-          # TODO dont return progress here
      except Exception as exc:
           log = open("/tmp/errorlog.txt", "w")
           traceback.print_exc(file=log)
           log.close()
-     return JsonResponse({'progress': 50})
+     return JsonResponse({'basename': basename, 'sessionId': sessionId}) #TODO remove session id
 
 @login_required()
 def render3D(request, conn=None, **kwargs):

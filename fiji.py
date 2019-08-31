@@ -35,13 +35,25 @@ def send(msg):
 	print 'Received', repr(data)
 	return data
 
-def run(basename, imageid, w, h):
-	send('render ' + basename + ' ' + str(imageid) + ' ' + str(w) + ' ' + str(h) + '\n')
+def startRendering(host, sessionid, basename, imageid, w, h):
+	send('render ' + host + ' ' + sessionid + ' ' + basename + ' ' + str(imageid) + ' ' + str(w) + ' ' + str(h) + '\n')
+
+def getStateAndProgress(basename):
+	state = send('getstate ' + basename + '\n')
+	progress = float(send('getprogress ' + basename + '\n'))
+	return state, progress 
+
+def run(host, sessionid, basename, imageid, w, h):
+	startRendering(host, sessionid, basename, imageid, w, h)
 	while True:
-		resp = send('getstate ' + basename + '\n')
+		resp, prog = getStateAndProgress(basename)
 		if resp and resp.startswith('FINISHED'):
+			break
+		if resp and resp.startswith('ERROR'):
 			break
 		time.sleep(0.1)
 
-basename = '/tmp/bschmid-2019-08-23-09-28-56'
-run(basename, 1, 256, 256)
+host = 'omero'
+sessionid = '9et1v5f8ftzswwqwnkwh5a7630bknk4x'
+basename = '/tmp/bschmid-2019-08-23-15-43-24'
+run(host, sessionid, basename, 1, 256, 256)
