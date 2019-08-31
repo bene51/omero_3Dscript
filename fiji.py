@@ -3,6 +3,9 @@ import socket
 import time
 from subprocess import Popen, PIPE
 
+# FIJI_DIR = "/Users/bene/Fiji.app/"
+# FIJI_BIN = FIJI_DIR + "Contents/MacOS/ImageJ-macosx"
+
 FIJI_DIR = "/usr/local/share/Fiji.app/"
 FIJI_BIN = FIJI_DIR + "ImageJ-linux64"
 
@@ -11,6 +14,7 @@ def startFiji():
 	cmd = [FIJI_BIN, '--console', '--headless', '-eval', 'run("3Dscript Server", "");']
 	print(cmd[4])
 	p = Popen(cmd, stdout=PIPE)
+	#TODO check for error (timeout?)
 	for line in iter(p.stdout.readline, b''):
 		print(line)
 		if line.startswith('Waiting for connection...'):
@@ -22,9 +26,8 @@ def send(msg):
 	try:
 		s.connect(('localhost', 3333))
 	except socket.error as e:
-		if e.errno == 111:
-			startFiji()
-			return send(msg)
+		startFiji()
+		return send(msg)
 	s.sendall(msg)
 	data = None
 	while not data:
