@@ -47,6 +47,10 @@
     }
 
     function startRendering() {
+      enableRenderingButton(false);
+      $("#backtrace")[0].innerHTML = "";
+      accordion.accordion("refresh");
+      accordion.accordion("option", "active", false);
       $.ajax({
         url: '/omero_3dscript/startRendering',
         data: {
@@ -56,26 +60,50 @@
         },
         dataType: 'json',
         success: function(data) {
-          var basename = data.basename;
-          console.log(data.sessionId); // TODO remove again
-          $('#pbar').width(0 + '%');
-          updateState(basename);
+          if(data.error) {
+            setStateAndProgress('ERROR: ' + data.error.trim(), -1);
+            enableRenderingButton(true);
+          }
+          else {
+            var basename = data.basename;
+            console.log(data.sessionId); // TODO remove again
+            $('#bar').width(1 + '%');
+            updateState(basename);
+          }
+        },
+        error: function(xhr, ajaxOptions, thrownError) {
+          console.debug("error in startRendering " + thrownError);
         }
       });
     }
 
     function setStateAndProgress(state, progress) {
       var pbar = $('#bar');
+      var label = $('#barlabel');
       if(progress >= 0)
         // pbar.width(progress + '%');
         pbar.stop().animate({"width": progress + '%'}, 100); // .queue(function(){});
       if(state != null) {
-        pbar[0].innerHTML = state;
-        if(state.startsWith('ERROR'))
-          pbar.css({"background-color":"red", "color":"black"});
-        else
-          pbar.css({"background-color":"#4caf50", "color":"white"});
+        label[0].innerHTML = state;
+        if(state.startsWith('ERROR')) {
+          pbar.css({"background-color":"red"});
+          label.css({"color":"black"});
+          $("#backtrace")[0].innerHTML = "this is a very long backtrace";
+          accordion.accordion("refresh");
+          accordion.accordion("option", "active", 0);
+        }
+        else {
+          pbar.css({"background-color":"#4caf50"});
+          label.css({"color":"white"});
+          $("#backtrace")[0].innerHTML = "";
+          accordion.accordion("refresh");
+          accordion.accordion("option", "active", false);
+        }
       }
+    }
+
+    function enableRenderingButton(state) {
+      $('#startRendering').prop("disabled", !state);
     }
 
     function updateState(basename) {
@@ -90,9 +118,11 @@
             console.debug(100 * data.progress);
             if(data.state.startsWith('ERROR')) {
               setStateAndProgress('ERROR', 100 * data.progress);
+              enableRenderingButton(true);
             }
             else if (data.state.startsWith('FINISHED')) {
               createAnnotation(basename);
+              enableRenderingButton(true);
             }
             else {
               setStateAndProgress(data.state, 100 * data.progress);
@@ -113,15 +143,21 @@
           },
           dataType: 'json',
           success: function(data) {
-            annotationId = data.annotationId;
-            console.debug('annotationId = ' + annotationId);
-            $('#videoContainer')[0].innerHTML = `
-<video style="margin-left: auto; margin-right: auto; display: block; position: relative; top: 50%; transform: translateY(-50%);" id="preview" controls>
-  <source src="/webclient/annotation/${annotationId}" type="video/mp4">
-  Your browser doesn't support this video.
-</video>`.trim();
-            resizeit();
-            setStateAndProgress('FINISHED', 100);
+            if(data.error) {
+              setStateAndProgress('ERROR: ' + data.error.trim(), -1);
+              enableRenderingButton(true);
+            }
+            else {
+              annotationId = data.annotationId;
+              console.debug('annotationId = ' + annotationId);
+              $('#videoContainer')[0].innerHTML = `
+  <video style="margin-left: auto; margin-right: auto; display: block; position: relative; top: 50%; transform: translateY(-50%);" id="preview" controls>
+    <source src="/webclient/annotation/${annotationId}" type="video/mp4">
+    Your browser doesn't support this video.
+  </video>`.trim();
+              resizeit();
+              setStateAndProgress('FINISHED', 100);
+            }
           }
       });
     }
@@ -243,6 +279,16 @@
       $("#settings").on( "click", function() {
         dialog.dialog( "open" );
       });
+
+      accordion = $("#accordion").accordion({
+        collapsible: true,
+        active: false,
+        animate: 200,
+//        icons: {
+//          "header": false, // "ui-icon-triangle-1-e",
+//          "activeHeader": false //"ui-icon-triangle-1-s"
+//        }
+      });
     });
 
 
@@ -269,8 +315,73 @@
   {% endfor %}
   {% endcomment %}
 
-  <div style="border-radius: 3px; width: 600px; margin-left: auto; margin-right: auto; margin-top: 5px; margin-bottom: 5px; background-color: #ddd;" id="progress">
-    <div id="bar" style="border-radius: 3px; background-color: #4caf50; height: 20px; text-align: center; line-height: 20px; color: #fff; padding-left: 0px; width: 1%;"> </div>
+<style>
+.ui-accordion {
+  font-size: 0.8em;
+  width: 600px;
+  margin: 5px auto;
+}
+.ui-accordion .ui-accordion-content {
+  padding: 0.3em 1em;
+}
+.ui-accordion .ui-accordion-header {
+  padding: 0;
+  height: 20px;
+  border: none;
+  color: black;
+}
+.ui-accordion .ui-accordion-header-icon {
+  display: block;
+  display: none;
+  position: absolute;
+  margin-top: 0;
+}
+#progress {
+  border-radius: 3px;
+  background-color: #ddd;
+  position: relative;
+}
+#bar {
+  border-radius: 3px;
+  border: none;
+  background-color: #4caf50;
+  height: 20px;
+  color: #fff;
+  width: 1%;
+  position: absolute;
+  left: 0;
+  top: 0;
+  padding: 0;
+}
+#barlabel {
+  border-radius: 3px;
+  background-color: None;
+  height: 20px;
+  text-align: left;
+  line-height: 20px;
+  color: #fff;
+  padding: 0;
+  left: 1em;
+  /* width: 100%;*/
+  position: absolute;
+}
+
+#buttons {
+  margin-top: 5px;
+}
+</style>
+  <!--div style="border-radius: 3px; width: 600px; height: 20px; margin-left: auto; margin-right: auto; margin-top: 5px; margin-bottom: 5px; background-color: #ddd; position: relative;" id="progress">
+    <div id="bar" style="border-radius: 3px; background-color: #4caf50; height: 20px; text-align: center; line-height: 20px; color: #fff; width: 1%; padding: 0; position: absolute; left: 0px; top: 0px;"></div>
+    <div id="barlabel" style="border-radius: 3px; background-color: None; height: 20px; text-align: left; line-height: 20px; color: #fff; left: 5px; width: 100%; position: absolute;"> </div>
+  </div-->
+
+  <div id="accordion">
+    <div id="progress">
+      <div id="bar"></div>
+      <div id="barlabel">bla</div>
+    </div>
+    <div id="backtrace">
+    </div>
   </div>
 
   <div style="width:600px; margin-left: auto; margin-right: auto;">
@@ -280,8 +391,8 @@ At frame 0 zoom by a factor of 0.9
 From frame 0 to frame 200 rotate by 360 degrees horizontally
 {% endif %}</textarea>
     {% endspaceless %}
-  <div>
-    <button name="startRendering" value="" onclick="startRendering()">Render</button>
+  <div id="buttons">
+    <button name="startRendering" id="startRendering" value="" onclick="startRendering()">Render</button>
     <button name="settings" id="settings" value="">Settings</button>
   </div>
   </div>
