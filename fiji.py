@@ -2,13 +2,14 @@ import sys
 import socket
 import time
 import threading
+import os.path
 from subprocess import Popen, PIPE
 
-# FIJI_DIR = "/Users/bene/Fiji.app/"
-# FIJI_BIN = FIJI_DIR + "Contents/MacOS/ImageJ-macosx"
+FIJI_DIR = "/Users/bene/Fiji.app/"
+FIJI_BIN = FIJI_DIR + "Contents/MacOS/ImageJ-macosx"
 
-FIJI_DIR = "/usr/local/share/Fiji.app/"
-FIJI_BIN = FIJI_DIR + "ImageJ-linux64"
+# FIJI_DIR = "/usr/local/share/Fiji.app/"
+# FIJI_BIN = FIJI_DIR + "ImageJ-linux64"
 
 
 def startFiji(co):
@@ -31,22 +32,21 @@ def startFiji(co):
 	finally:
 		log.close()
 		err.close()
-    
+
 
 def send(msg):
 	s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 	try:
 		s.connect(('localhost', 3333))
 	except socket.error as e:
-		if e.errno == 111:
-			co = threading.Event()
-			threading.Thread(name='startFiji', target=startFiji, args=(co,)).start()
-			# startFiji(co)
-			# with co:
-			co.wait(15.0) #seconds
-			if not co.is_set(): #timeout
-				raise Exception("Unable to start Fiji"); #TODO kill fiji
-			return send(msg)
+		co = threading.Event()
+		threading.Thread(name='startFiji', target=startFiji, args=(co,)).start()
+		# startFiji(co)
+		# with co:
+		co.wait(15.0) #seconds
+		if not co.is_set(): #timeout
+			raise Exception("Unable to start Fiji"); #TODO kill fiji
+		return send(msg)
 	s.sendall(msg)
 	data = None
 	while not data:
@@ -54,13 +54,34 @@ def send(msg):
 	print 'Received', repr(data)
 	return data
 
-def startRendering(host, sessionid, basename, imageid, w, h):
-	send('render ' + host + ' ' + sessionid + ' ' + basename + ' ' + str(imageid) + ' ' + str(w) + ' ' + str(h) + '\n')
+def checkFijiPath():
+	if not os.path.isfile(FIJI_BIN):
+		raise Exception(FIJI_BIN + " does not exist")
+	pass
+
+#
+
+def startRendering(host,\
+	sessionid, \
+	basename, \
+	imageid, \
+	w, \
+	h, \
+	bbVisible, \
+	bbColor, \
+	bbLinewidth, \
+	sbVisible, \
+	sbColor, \
+	sbLinewidth, \
+	sbPosition, \
+	sbOffset, \
+	sbLength):
+	send("render %s %s %s %s %s %s %s %s %s %s %s %s %s %s %s\n" % (host, sessionid, basename, imageid, w, h, bbVisible, bbColor, bbLinewidth, sbVisible, sbColor, sbLinewidth, sbPosition.replace(" ", "_"), sbOffset, sbLength))
 
 def getStateAndProgress(basename):
 	state = send('getstate ' + basename + '\n')
 	progress = float(send('getprogress ' + basename + '\n'))
-	return state, progress 
+	return state, progress
 
 def run(host, sessionid, basename, imageid, w, h):
 	startRendering(host, sessionid, basename, imageid, w, h)

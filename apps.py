@@ -1,6 +1,6 @@
 from django.apps import AppConfig
 
 class AppNameAppConfig(AppConfig):
-	name = "3Dscript"
+	name = "omero_3dscript"
 	label = "3Dscript"
 

@@ -11,27 +11,50 @@
       var targetVideoHeight = $("#videoContainer")[0].clientHeight;
       console.log("tgtw = " + targetVideoWidth + " tgth = " + targetVideoHeight);
       var targetAspect = targetVideoWidth / targetVideoHeight;
+      console.debug("targetAspect = "  + targetAspect);
 
       var previews = $("#preview");
       if(previews.length > 0) {
         var preview = previews[0];
-        preview.addEventListener("loadedmetadata", function(e) {
-          var videoWidth = this.videoWidth;
-          var videoHeight = this.videoHeight;
-          var aspect = videoWidth / videoHeight;
-          if(aspect > targetAspect) {
-            // keep width and let hight be adjusted automatically
-            preview.width = targetVideoWidth;
-          }
-          else {
-            // keep height and let width be adjusted automatically
-            preview.height = targetVideoHeight;
-          }
-          console.log("videoWidth = " + videoWidth);
-          console.log("videoHeight = " + videoHeight);
-  
-          console.log("videoWidth/videoHeight = " + (videoWidth / videoHeight));
-        });
+        if(preview.tagName == "VIDEO") {
+          preview.addEventListener("loadedmetadata", function(e) {
+            var videoWidth = this.videoWidth;
+            var videoHeight = this.videoHeight;
+            var aspect = videoWidth / videoHeight;
+            if(aspect > targetAspect) {
+              // keep width and let hight be adjusted automatically
+              preview.width = targetVideoWidth;
+            }
+            else {
+              // keep height and let width be adjusted automatically
+              preview.height = targetVideoHeight;
+            }
+            console.log("videoWidth = " + videoWidth);
+            console.log("videoHeight = " + videoHeight);
+
+            console.log("videoWidth/videoHeight = " + (videoWidth / videoHeight));
+          });
+        }
+        else if(preview.tagName == "IMG") {
+          preview.onload = function() {
+            console.debug(previews);
+            var videoWidth = preview.clientWidth;
+            console.debug("videoWidth = "  + videoWidth);
+            var videoHeight = preview.clientHeight;
+            console.debug("videoHeight = "  + videoHeight);
+            var aspect = videoWidth / videoHeight;
+            console.debug("aspect = " + aspect);
+            if(aspect > targetAspect) {
+              // keep width and let hight be adjusted automatically
+              preview.width = targetVideoWidth;
+              console.debug("targetVideoWidth = " + targetVideoWidth);
+            }
+            else {
+              // keep height and let width be adjusted automatically
+              preview.height = targetVideoHeight;
+            }
+          };
+        }
       }
     }
 
@@ -40,22 +63,47 @@
       $("#backtrace")[0].innerHTML = "";
       accordion.accordion("refresh");
       accordion.accordion("option", "active", false);
+      var imageId = $("#imageId")[0].value;
+      var script = $("#script")[0].value;
+      var targetWidth = $("#tgtWidth")[0].value;
+      var targetHeight = $("#tgtHeight")[0].value;
+      var bbVisible = $("#bbswitch")[0].checked;
+      var bbColor = $("#bbcolor")[0].value;
+      var bbLinewidth = $("#bblinewidth")[0].value;
+      var sbVisible = $("#sbswitch")[0].checked;
+      var sbColor = $("#sbcolor")[0].value;
+      var sbLinewidth = $("#sblinewidth")[0].value;
+      var sbPosition = $("#sbposition")[0].value;
+      var sbOffset = $("#sboffset")[0].value;
+      var sbLength = $("#sblength")[0].value;
+      console.debug("startRendering");
       $.ajax({
         url: '/omero_3dscript/startRendering',
         data: {
-          script: $("#script")[0].value,
-          targetWidth: $("#tgtWidth")[0].value,
-          targetHeight: $("#tgtHeight")[0].value
+          imageId: imageId,
+          script: script,
+          targetWidth: targetWidth,
+          targetHeight: targetHeight,
+          bbVisible: bbVisible,
+          bbColor: bbColor,
+          bbLinewidth: bbLinewidth,
+          sbVisible: sbVisible,
+          sbColor: sbColor,
+          sbLinewidth: sbLinewidth,
+          sbPosition: sbPosition,
+          sbOffset: sbOffset,
+          sbLength: sbLength
         },
         dataType: 'json',
         success: function(data) {
           if(data.error) {
-            setStateAndProgress('ERROR: ' + data.error.trim(), -1);
+            console.debug("error startRendering");
+            setStateAndProgress('ERROR: ' + data.error.trim(), -1, data.stacktrace);
             enableRenderingButton(true);
           }
           else {
+            console.debug("success startRendering");
             var basename = data.basename;
-            console.log(data.sessionId); // TODO remove again
             $('#bar').width(1 + '%');
             updateState(basename);
           }
@@ -66,7 +114,7 @@
       });
     }
 
-    function setStateAndProgress(state, progress) {
+    function setStateAndProgress(state, progress, stacktrace=null) {
       var pbar = $('#bar');
       var label = $('#barlabel');
       if(progress >= 0)
@@ -77,7 +125,8 @@
         if(state.startsWith('ERROR')) {
           pbar.css({"background-color":"red"});
           label.css({"color":"black"});
-          $("#backtrace")[0].innerHTML = "this is a very long backtrace";
+          if(stacktrace)
+            $("#backtrace")[0].innerHTML = "<pre>" + stacktrace + "</pre>";
           accordion.accordion("refresh");
           accordion.accordion("option", "active", 0);
         }
@@ -97,6 +146,7 @@
 
     function updateState(basename) {
       setTimeout(function myTimer() {
+        console.debug("updateState");
         $.ajax({
           url: '/omero_3dscript/getStateAndProgress',
           data: {
@@ -104,22 +154,28 @@
           },
           dataType: 'json',
           success: function(data) {
-            console.debug(100 * data.progress);
             if(data.state.startsWith('ERROR')) {
-              setStateAndProgress('ERROR', 100 * data.progress);
+              console.debug("error updateState");
+              setStateAndProgress('ERROR', 100 * data.progress, data.stacktrace);
               enableRenderingButton(true);
             }
             else if (data.state.startsWith('FINISHED')) {
+              console.debug("finished updateState");
               createAnnotation(basename);
               enableRenderingButton(true);
             }
             else {
+              console.debug("before setStateAndProgress");
               setStateAndProgress(data.state, 100 * data.progress);
+              console.debug("about to call updateState again");
               updateState(basename);
             }
+          },
+          error: function(xhr, ajaxOptions, thrownError) {
+            console.debug("error in updateState " + thrownError);
           }
         });
-      }, 30);
+      }, 500);
     }
 
     function createAnnotation(basename) {
@@ -128,7 +184,7 @@
           url: '/omero_3dscript/createAnnotation',
           data: {
             basename: basename,
-            imageId: 1 // TODO replace with real id
+            imageId: $("#imageId")[0].value
           },
           dataType: 'json',
           success: function(data) {
@@ -139,11 +195,18 @@
             else {
               annotationId = data.annotationId;
               console.debug('annotationId = ' + annotationId);
-              $('#videoContainer')[0].innerHTML = `
-  <video style="margin-left: auto; margin-right: auto; display: block; position: relative; top: 50%; transform: translateY(-50%);" id="preview" controls>
-    <source src="/webclient/annotation/${annotationId}" type="video/mp4">
-    Your browser doesn't support this video.
-  </video>`.trim();
+              if(data.isVideo) {
+                $('#videoContainer')[0].innerHTML = `
+    <video id="preview" style="margin-left: auto; margin-right: auto; display: block; position: relative; top: 50%; transform: translateY(-50%);" controls>
+      <source src="/webclient/annotation/${annotationId}" type="video/mp4">
+      Your browser doesn't support this video.
+    </video>`.trim();
+              }
+              else {
+                $('#videoContainer')[0].innerHTML = `
+    <img id="preview" style="margin-left: auto; margin-right: auto; display: block; position: relative; top: 50%; transform: translateY(-50%);" src="/webclient/annotation/${annotationId}" type="image/png">
+    </img>`.trim();
+              }
               resizeit();
               setStateAndProgress('FINISHED', 100);
             }
@@ -162,7 +225,7 @@
       sbcolor = $("#sbcolor"),
       sblinewidth = $("#sblinewidth"),
       sblength = $("#sblength"),
-      
+
       allFields = $( [] ).
         add(tgtWidth).
         add(tgtHeight).
@@ -221,7 +284,7 @@
       function verify() {
         var valid = true;
         allFields.removeClass( "ui-state-error" );
-   
+
         valid = valid && checkInteger(tgtWidth, "Output width", 50);
         valid = valid && checkInteger(tgtHeight, "Output height", 50);
         valid = valid && checkNumber(bblinewidth, "Bounding box width", 0);
@@ -230,14 +293,30 @@
 
         if(valid)
           dialog.dialog("close");
-   
+
         return valid;
       }
 
-      dialog = $( "#dialog-form" ).dialog({
+      function onresize() {
+        left = ($(window).width() - 600) / 2.0;
+        // devide the left space into 5 parts,
+        // 4 will be covered by the logo, the 5th
+        // is gap
+        gap = left / 5.0;
+        logow = gap * 4;
+        if(logow > 150)
+          logow = 150;
+        if(logow < 50)
+          logow = 0;
+        $("#logo").width(logow + 'px');
+        $("#logo").height(logow + 'px');
+        $("#header").css({"padding-left": left + "px"});
+      }
+
+      dialog = $( "#dialog-settings" ).dialog({
         autoOpen: false,
-        height: 400,
-        width: 600,
+        height: 'auto',
+        width: 'auto',
         modal: true,
         show: {
           effect: "fade",
@@ -257,6 +336,11 @@
         close: function() {
           updateTips("");
           allFields.removeClass( "ui-state-error" );
+        },
+        position: {
+          my: "center",
+          at: "center",
+          of: window
         }
       });
 
@@ -278,31 +362,160 @@
 //          "activeHeader": false //"ui-icon-triangle-1-s"
 //        }
       });
+
+      $(window).resize(function() {
+        onresize();
+      });
+
+      $(window).scroll(function() {
+        et = $("#logo").offset().top;
+        wt = $(window).scrollTop();
+        absY = et - wt;
+        if(wt > 65) {
+          $("#logo").css({'top': wt + 5});
+        }
+        else {
+          $("#logo").css({'top': 60});
+        }
+      });
+
+      onresize();
     });
 
+    $(function() {
+      var dialog, form,
+      imageId = $("#imageId"),
+
+      allFields = $( [] ).
+        add(imageId);
+      tips = $( ".validateTipsNewImage" );
+
+      function updateTips( t ) {
+        tips
+          .text( t )
+          .addClass( "ui-state-highlight" );
+        setTimeout(function() {
+          tips.removeClass( "ui-state-highlight", 1500 );
+        }, 500 );
+      }
+
+      function checkInteger(o, n, min) {
+        var v = 0;
+        var valid = true;
+        try {
+          v = parseInt(o.val());
+        } catch(error) {
+          valid = false;
+        }
+        valid = valid && v >= min;
+
+        if(!valid) {
+          o.addClass("ui-state-error");
+          updateTips(n + " must be a whole number >= " + min);
+        }
+        return valid;
+      }
+
+      function verify() {
+        allFields.removeClass( "ui-state-error" );
+
+        var valid = checkInteger(imageId, "Image ID", 0);
+        if(!valid)
+          return false;
+
+	//TODO set title (name of image)
+        $.ajax({
+          url: '/omero_3dscript/getName',
+          data: {
+            image: imageId.val()
+          },
+          async: false,
+          dataType: 'json',
+          success: function(data) {
+            if(data.error) {
+              console.debug("error in verify: " + data.error);
+              updateTips(data.error);
+              valid = false;
+            }
+            else {
+              console.debug("success in verify");
+              $('#headertxt')[0].innerHTML = data.name;
+            }
+          },
+          error: function(xhr, ajaxOptions, thrownError) {
+            console.debug("error in startRendering " + thrownError);
+          }
+        });
+
+        if(!valid)
+          return false;
+
+        dialog.dialog("close");
+        return true;
+      }
+
+      dialog = $( "#dialog-newimage" ).dialog({
+        autoOpen: false,
+        height: 'auto',
+        width: 'auto',
+        modal: true,
+        show: {
+          effect: "fade",
+          duration: 500
+        },
+        hide: {
+          effect: "fade",
+          duration: 500
+        },
+        buttons: {
+          "Close": verify,
+          Cancel: function() {
+            form[ 0 ].reset();
+            dialog.dialog( "close" );
+          }
+        },
+        close: function() {
+          updateTips("");
+          allFields.removeClass( "ui-state-error" );
+        },
+        position: {
+          my: "center",
+          at: "center",
+          of: window
+        }
+      });
+
+      $("#imagebutton").on( "click", function() {
+        dialog.dialog( "open" );
+      });
+
+      form = dialog.find("form").on("submit", function(event) {
+        event.preventDefault();
+        verify();
+      });
+
+      if($("#imageId")[0].value < 0) {
+        $("#imageId")[0].value = '';
+        dialog.dialog( "open" );
+      }
+    });
 
   </script>
 </head>
 <body>
-  <h1>{{ image_name }}</h1>
-
-  {{ macro }}
-  {{ outfile }}
-
-<div id="videoContainer" style="color: white; width: 600px; height: 450px; background-color: black; margin-left: auto; margin-right: auto;">
-  {% if annotationId %}
-  <video style="margin-left: auto; margin-right: auto; display: block; position: relative; top: 50%; transform: translateY(-50%);" id="preview" controls>
-    <source src="/webclient/annotation/{{annotationId}}" type="video/mp4">
-    Your browser doesn't support this video.
-  </video>
-  {% endif %}
-</div>
-  {% comment %}
-  {% for z in z_indexes %}
-  <img src="{% url 'webgateway.views.render_image' imageId z 0 %}"
-    style="max-width: 200px; max-height:200px"/>
-  {% endfor %}
-  {% endcomment %}
+  <img src="{% static '3Dscript/images/3DscriptLogo.png' %}" id="logo"></img>
+  <div id="header">
+    <span id="headertxt" style="line-height: 20px; height: 30px;min-width: 5px;">{{ image_name }}</span>
+    <button id="imagebutton" style="margin-left: 5px; width: 30px; height: 30px; background: url({% static '3Dscript/images/edit-button.png' %}) center center no-repeat; background-size: contain; position: relative; top: -2px; line-height: 20px; vertical-align: middle; display: inline-block; border: none;"></button>
+  </div>
+  <div id="videoContainer">
+    {% if annotationId %}
+    <video id="preview" controls>
+      <source src="/webclient/annotation/{{annotationId}}" type="video/mp4">
+      Your browser doesn't support this video.
+    </video>
+    {% endif %}
+  </div>
 
 <style>
 .ui-accordion {
@@ -355,27 +568,93 @@
   position: absolute;
 }
 
+body {
+  height: 100%;
+}
+
+#header {
+  box-sizing: border-box;
+  width: 600px;
+  width: 100%;
+  font-size: 1.5em;
+  height: 30px;
+  text-align: left;
+  padding-left: 0.0em;
+  margin-top: 20px;
+  margin-bottom: 10px;
+  color: white; /* #005599; */
+  border-radius: 0px;
+  background-color: #4caf50;
+}
+
 #buttons {
   margin-top: 5px;
 }
+
+#script {
+  width: 600px;
+  height: 250px;
+}
+
+#videoContainer {
+  color: white;
+  width: 600px;
+  height: 450px;
+  background-color: black;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+video #preview {
+  margin-left: auto;
+  margin-right: auto;
+  display: block;
+  position: relative;
+  top: 50%;
+  transform: translateY(-50%);"
+}
+
+img #preview {
+  margin-left: auto;
+  margin-right: auto;
+  display: block;
+  position: relative;
+  top: 50%;
+  transform: translateY(-50%);"
+}
+
+#footer {
+  font-size: 0.8em;
+  text-align: center;
+  color: #888;
+  width: 100%;
+  border-top: solid 1px #888;
+  margin-top: 4em;
+  padding-top: 5px;
+  padding-bottom: 5px;
+}
+
+#logo {
+  float: left;
+  width: 200px;
+  height: 200px;
+  position: absolute;
+  top: 60px;
+}
 </style>
-  <!--div style="border-radius: 3px; width: 600px; height: 20px; margin-left: auto; margin-right: auto; margin-top: 5px; margin-bottom: 5px; background-color: #ddd; position: relative;" id="progress">
-    <div id="bar" style="border-radius: 3px; background-color: #4caf50; height: 20px; text-align: center; line-height: 20px; color: #fff; width: 1%; padding: 0; position: absolute; left: 0px; top: 0px;"></div>
-    <div id="barlabel" style="border-radius: 3px; background-color: None; height: 20px; text-align: left; line-height: 20px; color: #fff; left: 5px; width: 100%; position: absolute;"> </div>
-  </div-->
+
 
   <div id="accordion">
     <div id="progress">
       <div id="bar"></div>
-      <div id="barlabel">bla</div>
+      <div id="barlabel"> </div>
     </div>
-    <div id="backtrace">
-    </div>
+    <div id="backtrace"></div>
   </div>
 
   <div style="width:600px; margin-left: auto; margin-right: auto;">
     {% spaceless %}
-    <textarea id="script" style="width: 600px; height: 250px;" name="script">{% if s %}{{ s }}{% else %}
+    <textarea id="script" name="script">{% if s %}{{ s }}{% else %}
 At frame 0 zoom by a factor of 0.9
 From frame 0 to frame 200 rotate by 360 degrees horizontally
 {% endif %}</textarea>
@@ -384,36 +663,61 @@ From frame 0 to frame 200 rotate by 360 degrees horizontally
     <button name="startRendering" id="startRendering" value="" onclick="startRendering()">Render</button>
     <button name="settings" id="settings" value="">Settings</button>
   </div>
+
+  <div id="footer">
+    &copy;Benjamin Schmid, Optical Imaging Centre Erlangen, University of Erlangen-Nuremberg
   </div>
+</div>
 
 
 <style>
-#dialog-form form {
-  font-size: 0.8em;
+#dialog-settings form {
+  font-size: 1.0em;
 }
 
-#dialog-form form fieldset {
+#dialog-settings form fieldset {
   margin-top: 5px;
 }
 
-#dialog-form form fieldset legend {
+#dialog-settings form fieldset legend {
   font-size: 0.8em;
 }
-#dialog-form .number {
+#dialog-settings .number {
   width: 5em;
 }
-#dialog-form .leftmargin {
-  margin-left: 20px;
+#dialog-settings .leftmargin {
+  margin-left: 8px;
 }
-#dialog-form .rightmargin {
-  margin-right: 20px;
+#dialog-settings .rightmargin {
+  margin-right: 8px;
+}
+#dialog-newimage form {
+  font-size: 1.0em;
+}
+#dialog-newimage .leftmargin {
+  margin-left: 8px;
+}
+.ui-widget {
+  font-size: 0.8em;
+}
+.ui-widget-overlay.ui-front { /* you want this */
+  background-color: black;
+  opacity: 0.75;
 }
 </style>
 
 
-<div id="dialog-form" title="Settings">
+<div id="dialog-newimage" title="New image">
+  <p class="validateTipsNewImage"> </p>
+  <form>
+    <label for="imageId">New image ID</label>
+    <input type="number" name="imageId" id="imageId" value="{{imageId}}" class="leftmargin number ui-widget-content ui-corner-all">
+  </form>
+</div>
+
+<div id="dialog-settings" title="Settings">
   <p class="validateTips"> </p>
- 
+
   <form>
     <fieldset>
       <legend>Output Size</legend>
@@ -433,12 +737,29 @@ From frame 0 to frame 200 rotate by 360 degrees horizontally
       <legend>Scalebar</legend>
       <input type="checkbox" name="sbswitch" id="sbswitch" value="ScaleBar" checked>Visible
       <label for="sbcolor" class="leftmargin">Color</label>
-      <input type="color" id="sbcolor" name="sbcolor" value="#aaaaaa" style="vertical-align: bottom;" class="ui-widget-content ui-corner-all">
+      <input type="color" id="sbcolor" name="sbcolor" value="#ffffff" style="vertical-align: bottom;" class="ui-widget-content ui-corner-all">
       <label class="leftmargin" for="sblinewidth">Line width</label>
       <input type="number" name="sblinewidth" id="sblinewidth" value="1.0" min="0.0" step="0.5" class="number ui-widget-content ui-corner-all">
+<p>
       <label class="leftmargin" for="sblength">Length</label>
       <input type="number" name="sblength" id="sblength" value="100" min="0.0" step="0.1" class="number ui-widget-content ui-corner-all">
- 
+      <select name="sbposition" id="sbposition" class="leftmargin">
+        <option>object - lower left front</option>
+        <option>object - lower right front</option>
+        <option>object - upper left front</option>
+        <option>object - upper right front</option>
+        <option>object - lower left back</option>
+        <option>object - lower right back</option>
+        <option>object - upper left back</option>
+        <option>object - upper right back</option>
+        <option selected>view - lower left</option>
+        <option>view - lower right</option>
+        <option>view - upper left</option>
+        <option>view - upper right</option>
+      </select>
+      <label for="sboffset" class="leftmargin">Offset</label>
+      <input type="number" name="sboffset" id="sboffset" value="10" min="0" class="number ui-widget-content ui-corner-all">
+</p>
       <!--input type="password" name="password" id="password" value="xxxxxxx" class="text ui-widget-content ui-corner-all"-->
       <!-- Allow form submission with keyboard without duplicating the dialog button -->
       <input type="submit" tabindex="-1" style="position:absolute; top:-1000px">
