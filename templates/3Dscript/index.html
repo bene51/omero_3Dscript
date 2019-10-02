@@ -2,22 +2,11 @@
 <head>
   <meta charset="UTF-8">
   <title>3DScript</title>
-  <link rel="stylesheet" href="https://code.jquery.com/ui/1.12.1/themes/base/jquery-ui.css">
-  <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
-  <script src="https://code.jquery.com/ui/1.12.1/jquery-ui.min.js"></script>
-  {% comment %}
-  <!-- See https://docs.openmicroscopy.org/omero/5.4.9/developers/Web/CreateApp.html -->
-  <!-- jQuery -->
-  <!--{% include "webgateway/base/includes/script_src_jquery.html" %}-->
-  <!-- jQuery UI - includes js and css -->
-  <!--{% include "webgateway/base/includes/jquery-ui.html" %}-->
-  <!--link rel="stylesheet" href="jquery-ui-1.12.1/jquery-ui.css"-->
-  <!--script src="omero_3dscript/jquery-3.4.1.min.js"></script-->
-  <!--script src="omero_3dscript/jquery-ui-1.12.1/jquery-ui.js"></script-->
-  {% endcomment %}
+  <script src="{% static '3Dscript/3rdparty/jquery-ui-1.12.1/external/jquery/jquery.js' %}"></script>
+  <script src="{% static '3Dscript/3rdparty/jquery-ui-1.12.1/jquery-ui.min.js' %}"></script>
+  <link rel="stylesheet" href="{% static '3Dscript/3rdparty/jquery-ui-1.12.1/jquery-ui.css' %}">
   <script type="text/javascript">
     function resizeit() {
-      console.log
       var targetVideoWidth = $("#videoContainer")[0].clientWidth;
       var targetVideoHeight = $("#videoContainer")[0].clientHeight;
       console.log("tgtw = " + targetVideoWidth + " tgth = " + targetVideoHeight);
