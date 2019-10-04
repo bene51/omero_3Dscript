@@ -1,0 +1,34 @@
+#dialog-settings form {
+  font-size: 1.0em;
+}
+
+#dialog-settings form fieldset {
+  margin-top: 5px;
+}
+
+#dialog-settings form fieldset legend {
+  font-size: 0.8em;
+}
+#dialog-settings .number {
+  width: 5em;
+}
+#dialog-settings .leftmargin {
+  margin-left: 8px;
+}
+#dialog-settings .rightmargin {
+  margin-right: 8px;
+}
+#dialog-newimage form {
+  font-size: 1.0em;
+}
+#dialog-newimage .leftmargin {
+  margin-left: 8px;
+}
+.ui-widget {
+  font-size: 0.8em;
+}
+.ui-widget-overlay.ui-front { /* you want this */
+  background-color: black;
+  opacity: 0.75;
+}
+

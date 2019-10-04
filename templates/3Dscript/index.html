@@ -5,6 +5,8 @@
   <script src="{% static '3Dscript/3rdparty/jquery-ui-1.12.1/external/jquery/jquery.js' %}"></script>
   <script src="{% static '3Dscript/3rdparty/jquery-ui-1.12.1/jquery-ui.min.js' %}"></script>
   <link rel="stylesheet" href="{% static '3Dscript/3rdparty/jquery-ui-1.12.1/jquery-ui.css' %}">
+  <link rel="stylesheet" href="{% static '3Dscript/css/3Dscript.css' %}">
+  <link rel="stylesheet" href="{% static '3Dscript/css/dialogs.css' %}">
   <script type="text/javascript">
     function resizeit() {
       var targetVideoWidth = $("#videoContainer")[0].clientWidth;
@@ -517,133 +519,6 @@
     {% endif %}
   </div>
 
-<style>
-.ui-accordion {
-  font-size: 0.8em;
-  width: 600px;
-  margin: 5px auto;
-}
-.ui-accordion .ui-accordion-content {
-  padding: 0.3em 1em;
-}
-.ui-accordion .ui-accordion-header {
-  padding: 0;
-  height: 20px;
-  border: none;
-  color: black;
-}
-.ui-accordion .ui-accordion-header-icon {
-  display: block;
-  display: none;
-  position: absolute;
-  margin-top: 0;
-}
-#progress {
-  border-radius: 3px;
-  background-color: #ddd;
-  position: relative;
-}
-#bar {
-  border-radius: 3px;
-  border: none;
-  background-color: #4caf50;
-  height: 20px;
-  color: #fff;
-  width: 1%;
-  position: absolute;
-  left: 0;
-  top: 0;
-  padding: 0;
-}
-#barlabel {
-  border-radius: 3px;
-  background-color: None;
-  height: 20px;
-  text-align: left;
-  line-height: 20px;
-  color: #fff;
-  padding: 0;
-  left: 1em;
-  /* width: 100%;*/
-  position: absolute;
-}
-
-body {
-  height: 100%;
-}
-
-#header {
-  box-sizing: border-box;
-  width: 600px;
-  width: 100%;
-  font-size: 1.5em;
-  height: 30px;
-  text-align: left;
-  padding-left: 0.0em;
-  margin-top: 20px;
-  margin-bottom: 10px;
-  color: white; /* #005599; */
-  border-radius: 0px;
-  background-color: #4caf50;
-}
-
-#buttons {
-  margin-top: 5px;
-}
-
-#script {
-  width: 600px;
-  height: 250px;
-}
-
-#videoContainer {
-  color: white;
-  width: 600px;
-  height: 450px;
-  background-color: black;
-  margin-left: auto;
-  margin-right: auto;
-}
-
-video #preview {
-  margin-left: auto;
-  margin-right: auto;
-  display: block;
-  position: relative;
-  top: 50%;
-  transform: translateY(-50%);"
-}
-
-img #preview {
-  margin-left: auto;
-  margin-right: auto;
-  display: block;
-  position: relative;
-  top: 50%;
-  transform: translateY(-50%);"
-}
-
-#footer {
-  font-size: 0.8em;
-  text-align: center;
-  color: #888;
-  width: 100%;
-  border-top: solid 1px #888;
-  margin-top: 4em;
-  padding-top: 5px;
-  padding-bottom: 5px;
-}
-
-#logo {
-  float: left;
-  width: 200px;
-  height: 200px;
-  position: absolute;
-  top: 60px;
-}
-</style>
-
-
   <div id="accordion">
     <div id="progress">
       <div id="bar"></div>
@@ -668,43 +543,6 @@ From frame 0 to frame 200 rotate by 360 degrees horizontally
     &copy;Benjamin Schmid, Optical Imaging Centre Erlangen, University of Erlangen-Nuremberg
   </div>
 </div>
-
-
-<style>
-#dialog-settings form {
-  font-size: 1.0em;
-}
-
-#dialog-settings form fieldset {
-  margin-top: 5px;
-}
-
-#dialog-settings form fieldset legend {
-  font-size: 0.8em;
-}
-#dialog-settings .number {
-  width: 5em;
-}
-#dialog-settings .leftmargin {
-  margin-left: 8px;
-}
-#dialog-settings .rightmargin {
-  margin-right: 8px;
-}
-#dialog-newimage form {
-  font-size: 1.0em;
-}
-#dialog-newimage .leftmargin {
-  margin-left: 8px;
-}
-.ui-widget {
-  font-size: 0.8em;
-}
-.ui-widget-overlay.ui-front { /* you want this */
-  background-color: black;
-  opacity: 0.75;
-}
-</style>
 
 
 <div id="dialog-newimage" title="New image">
