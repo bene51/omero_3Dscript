@@ -1,4 +1,5 @@
 <html>
+
 <head>
   <meta charset="UTF-8">
   <title>3DScript</title>
@@ -8,20 +9,17 @@
   <link rel="stylesheet" href="{% static '3Dscript/css/3Dscript.css' %}">
   <link rel="stylesheet" href="{% static '3Dscript/css/dialogs.css' %}">
 </head>
+
+
 <body>
   <img src="{% static '3Dscript/images/3DscriptLogo.png' %}" id="logo"></img>
+
   <div id="header">
-    <span id="headertxt" style="line-height: 20px; height: 30px;min-width: 5px;">{{ image_name }}</span>
-    <button id="imagebutton" style="margin-left: 5px; width: 30px; height: 30px; background: url({% static '3Dscript/images/edit-button.png' %}) center center no-repeat; background-size: contain; position: relative; top: -2px; line-height: 20px; vertical-align: middle; display: inline-block; border: none;"></button>
+    <span id="headertxt">{{ image_name }}</span>
+    <button id="imagebutton"></button>
   </div>
-  <div id="videoContainer">
-    {% if annotationId %}
-    <video id="preview" controls>
-      <source src="/webclient/annotation/{{annotationId}}" type="video/mp4">
-      Your browser doesn't support this video.
-    </video>
-    {% endif %}
-  </div>
+
+  <div id="videoContainer"></div>
 
   <div id="accordion">
     <div id="progress">
@@ -32,12 +30,9 @@
   </div>
 
   <div style="width:600px; margin-left: auto; margin-right: auto;">
-    {% spaceless %}
-    <textarea id="script" name="script">{% if s %}{{ s }}{% else %}
+    <textarea id="script" name="script">
 At frame 0 zoom by a factor of 0.9
-From frame 0 to frame 200 rotate by 360 degrees horizontally
-{% endif %}</textarea>
-    {% endspaceless %}
+From frame 0 to frame 200 rotate by 360 degrees horizontally</textarea>
     <div id="buttons">
       <button name="startRendering" id="startRendering" value="">Render</button>
       <button name="settings" id="settings" value="">Settings</button>
@@ -49,6 +44,7 @@ From frame 0 to frame 200 rotate by 360 degrees horizontally
   </div>
 
 
+  <!-- new image dialog -->
   <div id="dialog-newimage" title="New image">
     <p class="validateTipsNewImage"> </p>
     <form>
@@ -57,6 +53,7 @@ From frame 0 to frame 200 rotate by 360 degrees horizontally
     </form>
   </div>
 
+  <!-- settings dialog -->
   <div id="dialog-settings" title="Settings">
     <p class="validateTips"> </p>
     <form>

@@ -1,6 +1,8 @@
 $(function() {
     var dialog, form,
+    headertxt = $("#headertxt"),
     imageId = $("#imageId"),
+    imagebutton = $("#imagebutton"),
 
     allFields = $( [] ).
         add(imageId);
@@ -55,7 +57,7 @@ $(function() {
               }
               else {
                 console.debug("success in verify");
-                $('#headertxt')[0].innerHTML = data.name;
+                headertxt[0].innerHTML = data.name;
               }
             },
             error: function(xhr, ajaxOptions, thrownError) {
@@ -101,7 +103,7 @@ $(function() {
         }
     });
 
-    $("#imagebutton").on( "click", function() {
+    imagebutton.on( "click", function() {
         dialog.dialog( "open" );
     });
 
@@ -110,8 +112,8 @@ $(function() {
         verify();
     });
 
-    if($("#imageId")[0].value < 0) {
-        $("#imageId")[0].value = '';
+    if(imageId[0].value < 0) {
+        imageId[0].value = '';
         dialog.dialog( "open" );
     }
 });

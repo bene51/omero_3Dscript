@@ -18,6 +18,27 @@
   position: absolute;
   margin-top: 0;
 }
+
+#headertxt {
+  line-height: 20px;
+  height: 30px;
+  min-width: 5px;
+}
+
+#imagebutton {
+  margin-left: 5px;
+  width: 30px;
+  height: 30px;
+  background: url('../images/edit-button.png') center center no-repeat;
+  background-size: contain;
+  position: relative;
+  top: -2px;
+  line-height: 20px;
+  vertical-align: middle;
+  display: inline-block;
+  border: none;
+}
+
 #progress {
   border-radius: 3px;
   background-color: #ddd;

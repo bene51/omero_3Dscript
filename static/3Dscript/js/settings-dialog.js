@@ -1,5 +1,6 @@
 $(function() {
     var dialog, form,
+    settingsbutton = $("#settings"),
     tgtWidth = $("#tgtWidth"),
     tgtHeight = $("#tgtHeight"),
     bbswitch = $("#bbswitch"),
@@ -117,7 +118,7 @@ $(function() {
         verify();
     });
 
-    $("#settings").on("click", function() {
+    settingsbutton.on("click", function() {
         dialog.dialog("open");
     });
 });
