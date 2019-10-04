@@ -117,8 +117,8 @@ $(function() {
         verify();
     });
 
-    $("#settings").on( "click", function() {
-        dialog.dialog( "open" );
+    $("#settings").on("click", function() {
+        dialog.dialog("open");
     });
 });
 
