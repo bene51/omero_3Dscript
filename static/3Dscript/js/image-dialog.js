@@ -86,8 +86,8 @@ $(function() {
         buttons: {
             "Close": verify,
             Cancel: function() {
-              form[ 0 ].reset();
-              dialog.dialog( "close" );
+                form[ 0 ].reset();
+                dialog.dialog( "close" );
             }
         },
         close: function() {

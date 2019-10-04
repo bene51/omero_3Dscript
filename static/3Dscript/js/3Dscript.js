@@ -1,4 +1,6 @@
 (function() {
+    var accordion;
+
     function resizeit() {
         var targetVideoWidth = $("#videoContainer")[0].clientWidth;
         var targetVideoHeight = $("#videoContainer")[0].clientHeight;
@@ -185,7 +187,7 @@
                     enableRenderingButton(true);
                 }
                 else {
-                    annotationId = data.annotationId;
+                    var annotationId = data.annotationId;
                     console.debug('annotationId = ' + annotationId);
                     if(data.isVideo) {
                         $('#videoContainer')[0].innerHTML = `
@@ -207,12 +209,12 @@
     }
 
     function onresize() {
-        left = ($(window).width() - 600) / 2.0;
+        var left = ($(window).width() - 600) / 2.0;
         // devide the left space into 5 parts,
         // 4 will be covered by the logo, the 5th
         // is gap
-        gap = left / 5.0;
-        logow = gap * 4;
+        var gap = left / 5.0;
+        var logow = gap * 4;
         if(logow > 150)
             logow = 150;
         if(logow < 50)
@@ -234,9 +236,9 @@
         });
     
         $(window).scroll(function() {
-            et = $("#logo").offset().top;
-            wt = $(window).scrollTop();
-            absY = et - wt;
+            var et = $("#logo").offset().top;
+            var wt = $(window).scrollTop();
+            var absY = et - wt;
             if(wt > 65) {
                 $("#logo").css({'top': wt + 5});
             }
