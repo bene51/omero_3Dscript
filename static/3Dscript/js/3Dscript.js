@@ -246,7 +246,10 @@
         });
     
         onresize();
-        console.debug("bla");
+
+        $("#startRendering").on("click", function() {
+            startRendering();
+        });
     }
 
     main();
