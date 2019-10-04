@@ -5,7 +5,6 @@ import tempfile
 import os
 import datetime
 import shutil
-from pytiff import PyTiff
 import traceback
 import fiji
 import logging
