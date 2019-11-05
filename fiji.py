@@ -2,17 +2,28 @@ import sys
 import socket
 import time
 import threading
-import os.path
+import os
 import logging
 from subprocess import Popen, PIPE
 
-FIJI_DIR = "/Users/bene/Fiji.app/"
-FIJI_BIN = FIJI_DIR + "Contents/MacOS/ImageJ-macosx"
-
-# FIJI_DIR = "/usr/local/share/Fiji.app/"
-# FIJI_BIN = FIJI_DIR + "ImageJ-linux64"
-
 logger = logging.getLogger(__name__)
+
+def getFijiBin():
+	fijibin = os.getenv('FIJI_BIN')
+	if fijibin is not None and os.path.isfile(fijibin):
+		return fijibin;
+	fijihome = os.getenv('FIJI_HOME')
+	if fijihome is not None and os.path.isdir(fijihome):
+		fijibin = fijihome + "/ImageJ-linux64"
+		if os.path.isfile(fijibin):
+			return fijibin
+		fijibin = fijihome + "/ImageJ-win64"
+		if os.path.isfile(fijibin):
+			return fijibin
+		fijibin = fijihome + "/Contents/MacOS/ImageJ-macosx"
+		if os.path.isfile(fijibin):
+			return fijibin
+	return None
 
 def startFiji(co):
 	print("startFiji")
@@ -20,7 +31,8 @@ def startFiji(co):
 	try:
 		log = open("/tmp/fiji.out", 'w')
 		err = open("/tmp/fiji.err", 'w')
-		cmd = [FIJI_BIN, '--console', '--headless', '-eval', 'run("3Dscript Server", "");']
+		fijibin = getFijiBin()
+		cmd = [fijibin, '--console', '--headless', '-eval', 'run("3Dscript Server", "");']
 		print(cmd[4])
 		p = Popen(cmd, stdout=PIPE, stderr=err)
 		for line in iter(p.stdout.readline, b''):
@@ -57,11 +69,9 @@ def send(msg):
 	return data
 
 def checkFijiPath():
-	if not os.path.isfile(FIJI_BIN):
-		raise Exception(FIJI_BIN + " does not exist")
-	pass
+	if getFijiBin() is None:
+		raise Exception("Fiji binary could not be found, please set the FIJI_BIN environment variable")
 
-#
 
 def startRendering(host,\
 	sessionid, \
