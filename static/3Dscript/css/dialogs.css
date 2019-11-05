@@ -24,7 +24,7 @@
 #dialog-newimage .leftmargin {
   margin-left: 8px;
 }
-.ui-widget {
+.ui-dialog.ui-widget {
   font-size: 0.8em;
 }
 .ui-widget-overlay.ui-front { /* you want this */

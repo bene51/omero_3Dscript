@@ -95,6 +95,34 @@ body {
 #script {
   width: 600px;
   height: 250px;
+  font-family: monospace;
+  font-size: 10pt;
+  line-height: 15px;
+}
+
+.ui-autocomplete {
+  font-family: monospace;
+  font-size: 10pt;
+  line-height: 15px;
+}
+
+.ui-state-active,
+.ui-widget-content .ui-state-active,
+.ui-widget-header .ui-state-active,
+a.ui-button:active,
+.ui-button:active,
+.ui-state-focus,
+.ui-button.ui-state-active:hover {
+	border: none!important;
+	background: #ace3af;
+	font-weight: normal;
+	color: #ffffff;
+}
+
+.ui-menu .ui-menu-item-wrapper {
+  padding-left: 0px;
+  padding: 0px;
+  margin: 0px;
 }
 
 #videoContainer {

@@ -3,6 +3,7 @@ import socket
 import time
 import threading
 import os.path
+import logging
 from subprocess import Popen, PIPE
 
 FIJI_DIR = "/Users/bene/Fiji.app/"
@@ -11,6 +12,7 @@ FIJI_BIN = FIJI_DIR + "Contents/MacOS/ImageJ-macosx"
 # FIJI_DIR = "/usr/local/share/Fiji.app/"
 # FIJI_BIN = FIJI_DIR + "ImageJ-linux64"
 
+logger = logging.getLogger(__name__)
 
 def startFiji(co):
 	print("startFiji")
@@ -82,6 +84,9 @@ def getStateAndProgress(basename):
 	state = send('getstate ' + basename + '\n')
 	progress = float(send('getprogress ' + basename + '\n'))
 	return state, progress
+
+def cancelRendering(basename):
+	send('cancel ' + basename + '\n')
 
 def run(host, sessionid, basename, imageid, w, h):
 	startRendering(host, sessionid, basename, imageid, w, h)

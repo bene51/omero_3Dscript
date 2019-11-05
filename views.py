@@ -53,6 +53,13 @@ def getStateAndProgress(request, conn=None, **kwargs):
      return JsonResponse({'state': state, 'progress': progress, 'stacktrace': exc})
 
 @login_required()
+def cancelRendering(request, conn=None, **kwargs):
+     logger.info("cancelRendering")
+     basename = request.GET['basename']
+     fiji.cancelRendering(basename)
+     return JsonResponse({})
+
+@login_required()
 def createAnnotation(request, conn=None, **kwargs):
      try:
           # raise Exception("Cannot create Annotation")

@@ -7,4 +7,5 @@ urlpatterns = patterns('django.views.generic.simple',
 	url(r'^getName$', views.getName, name='3Dscript_getName'),
 	url(r'^getStateAndProgress$', views.getStateAndProgress, name='3Dscript_getStateAndProgress'),
 	url(r'^createAnnotation$', views.createAnnotation, name='3Dscript_createAnnotation'),
+	url(r'^cancelRendering$', views.cancelRendering, name='3Dscript_cancelRendering'),
 )

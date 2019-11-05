@@ -1,6 +1,9 @@
 (function() {
     var accordion;
     var renderbutton = $("#render-button");
+    var cancelbutton = $("#cancel-button");
+    var basename;
+    var cancelled = false;
 
     function resizeit() {
         var targetVideoWidth = $("#videoContainer")[0].clientWidth;
@@ -47,9 +50,31 @@
         }
     }
 
+    function cancelRendering() {
+        enableCancelButton(false);
+        $.ajax({
+            url: '/omero_3dscript/cancelRendering',
+            data: {
+                basename: basename
+            },
+            dataType: 'json',
+            success: function(data) {
+                console.debug("cancelled");
+                setStateAndProgress("Cancelled", -1);
+                enableRenderingButton(true);
+                enableCancelButton(true);
+            },
+            error: function(xhr, ajaxOptions, thrownError) {
+                console.debug("error in updateState " + thrownError);
+            }
+        });
+    }
+
     function startRendering() {
+        cancelled = false;
         enableRenderingButton(false);
         $("#backtrace")[0].innerHTML = "";
+	setStateAndProgress("Starting", 2);
         accordion.accordion("refresh");
         accordion.accordion("option", "active", false);
         var imageId = $("#imageId")[0].value;
@@ -131,8 +156,16 @@
         renderbutton.prop("disabled", !state);
     }
 
+    function enableCancelButton(state) {
+        cancelbutton.prop("disabled", !state);
+    }
+
     function updateState(basename) {
         setTimeout(function myTimer() {
+            if(cancelled) {
+                cancelRendering();
+                return;
+            }
             $.ajax({
                 url: '/omero_3dscript/getStateAndProgress',
                 data: {
@@ -239,6 +272,85 @@
         renderbutton.on("click", function() {
             startRendering();
         });
+
+        cancelbutton.on("click", function() {
+            cancelled = true;
+        });
+
+        $("#script").bind("keydown", function(event) {
+            console.debug("*" + $(this).data("ui-autocomplete").menu.visible);
+            if(event.keyCode === $.ui.keyCode.TAB && $(this).data("ui-autocomplete").menu.active) {
+                event.preventDefault();
+            }
+        });
+
+        // https://stackoverflow.com/questions/5643767/jquery-ui-autocomplete-width-not-set-correctly
+        jQuery.ui.autocomplete.prototype._resizeMenu = function() {
+            var ul = this.menu.element;
+            ul.css("width: 100%;");
+        }
+
+        $("#script").autocomplete({
+            minLength: 0,
+            delay: 0,
+            
+            source: function( request, response ) {
+                console.debug("autocompletion: source()");
+                var caret = $("#script")[0].selectionStart;
+                var text = $("#script").val();
+		var data = getCompletions(text, caret);
+                var len = data.alreadyEnteredLength;
+                var op = data.options;
+		$("#script")[0].alreadyEnteredLength = len;
+		response(data.options);
+            },
+            minLength: 0,
+            autoFocus: true,
+            focus: function() {
+                return false;
+            },
+            select: function( event, ui ) {
+                console.debug("Selected: " + ui.item.value);
+                var txt = this.value;
+                console.debug(txt);
+                var insertPos = this.selectionEnd - this.alreadyEnteredLength;
+                console.debug("insertPos = "  + insertPos);
+                console.debug("left = " + txt.substring(0, insertPos));
+                var repl = txt.substring(0, insertPos) + ui.item.value + txt.substring(insertPos + this.selectionEnd);
+                console.debug("replace: " + repl);
+                this.value = repl;
+                return false;
+            },
+            open: function(event, ui) {
+                console.debug("open");
+                var caret = getCaretCoordinates(this, this.selectionEnd - this.alreadyEnteredLength);
+                var width = caret.left;
+                var height = caret.top;// + 15;
+                ta = $('#script');
+                width > ta.width() ?
+                  width = parseInt(ta.position().left + ta.width()) :
+                  width = parseInt(ta.position().left + width);
+
+                height > ta.height() ?
+                  height = parseInt(ta.position().top + ta.height()) :
+                  height = parseInt(ta.position().top + height);
+
+                $('.ui-autocomplete.ui-menu').css('left', width + 'px');
+                $('.ui-autocomplete.ui-menu').css('top', height + 'px');
+            },
+        }).data("ui-autocomplete")._renderItem = function( ul, item ) {
+                var alreadyEnteredLen = $("#script")[0].alreadyEnteredLength;
+                var div = $("<div>");
+                var li = $("<li>").append(div).appendTo(ul);
+                // div.append($("<b>").css({'color': '#4caf50'}).text(item.label.substring(0, alreadyEnteredLen)))
+                div.append($("<b>").css({'color': 'green'}).text(item.label.substring(0, alreadyEnteredLen)))
+                div.append($("<span>").text(item.label.substring(alreadyEnteredLen)));
+                div[0].contentEditable='true';
+                div[0].selectionStart = 0;
+                div[0].selectionEnd = alreadyEnteredLen;
+                return li;
+        };
+    } // main
 
     main();
 })();
