@@ -6,7 +6,6 @@
         var targetVideoHeight = $("#videoContainer")[0].clientHeight;
         console.log("tgtw = " + targetVideoWidth + " tgth = " + targetVideoHeight);
         var targetAspect = targetVideoWidth / targetVideoHeight;
-        console.debug("targetAspect = "  + targetAspect);
 
         var previews = $("#preview");
         if(previews.length > 0) {
@@ -31,17 +30,12 @@
             }
             else if(preview.tagName == "IMG") {
                 preview.onload = function() {
-                    console.debug(previews);
                     var videoWidth = preview.clientWidth;
-                    console.debug("videoWidth = "  + videoWidth);
                     var videoHeight = preview.clientHeight;
-                    console.debug("videoHeight = "  + videoHeight);
                     var aspect = videoWidth / videoHeight;
-                    console.debug("aspect = " + aspect);
                     if(aspect > targetAspect) {
                         // keep width and let hight be adjusted automatically
                         preview.width = targetVideoWidth;
-                        console.debug("targetVideoWidth = " + targetVideoWidth);
                     }
                     else {
                         // keep height and let width be adjusted automatically
@@ -70,7 +64,6 @@
         var sbPosition = $("#sbposition")[0].value;
         var sbOffset = $("#sboffset")[0].value;
         var sbLength = $("#sblength")[0].value;
-        console.debug("startRendering");
         $.ajax({
             url: '/omero_3dscript/startRendering',
             data: {
@@ -96,7 +89,6 @@
                     enableRenderingButton(true);
                 }
                 else {
-                    console.debug("success startRendering");
                     var basename = data.basename;
                     $('#bar').width(1 + '%');
                     updateState(basename);
@@ -140,7 +132,6 @@
 
     function updateState(basename) {
         setTimeout(function myTimer() {
-            console.debug("updateState");
             $.ajax({
                 url: '/omero_3dscript/getStateAndProgress',
                 data: {
@@ -149,19 +140,15 @@
                 dataType: 'json',
                 success: function(data) {
                     if(data.state.startsWith('ERROR')) {
-                        console.debug("error updateState");
                         setStateAndProgress('ERROR', 100 * data.progress, data.stacktrace);
                         enableRenderingButton(true);
                     }
                     else if (data.state.startsWith('FINISHED')) {
-                        console.debug("finished updateState");
                         createAnnotation(basename);
                         enableRenderingButton(true);
                     }
                     else {
-                        console.debug("before setStateAndProgress");
                         setStateAndProgress(data.state, 100 * data.progress);
-                        console.debug("about to call updateState again");
                         updateState(basename);
                     }
                 },
@@ -188,7 +175,6 @@
                 }
                 else {
                     var annotationId = data.annotationId;
-                    console.debug('annotationId = ' + annotationId);
                     if(data.isVideo) {
                         $('#videoContainer')[0].innerHTML = `
     <video id="preview" style="margin-left: auto; margin-right: auto; display: block; position: relative; top: 50%; transform: translateY(-50%);" controls>
