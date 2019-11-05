@@ -90,7 +90,7 @@
                     enableRenderingButton(true);
                 }
                 else {
-                    var basename = data.basename;
+                    basename = data.basename;
                     $('#bar').width(1 + '%');
                     updateState(basename);
                 }
