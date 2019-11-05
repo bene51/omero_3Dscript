@@ -5,6 +5,7 @@
   <title>3DScript</title>
   <script src="{% static '3Dscript/3rdparty/jquery-ui-1.12.1/external/jquery/jquery.js' %}"></script>
   <script src="{% static '3Dscript/3rdparty/jquery-ui-1.12.1/jquery-ui.min.js' %}"></script>
+  <script src="{% static '3Dscript/3rdparty/textarea-caret-position.js' %}"></script>
   <link rel="stylesheet" href="{% static '3Dscript/3rdparty/jquery-ui-1.12.1/jquery-ui.css' %}">
   <link rel="stylesheet" href="{% static '3Dscript/css/3Dscript.css' %}">
   <link rel="stylesheet" href="{% static '3Dscript/css/dialogs.css' %}">
@@ -34,7 +35,8 @@
 At frame 0 zoom by a factor of 0.9
 From frame 0 to frame 200 rotate by 360 degrees horizontally</textarea>
     <div id="buttons">
-      <button name="startRendering" id="startRendering" value="">Render</button>
+      <button name="render-button" id="render-button" value="">Render</button>
+      <button name="cancel-button" id="cancel-button" value="">Cancel</button>
       <button name="settings" id="settings" value="">Settings</button>
     </div>
 
@@ -107,5 +109,6 @@ From frame 0 to frame 200 rotate by 360 degrees horizontally</textarea>
   <script src="{% static '3Dscript/js/settings-dialog.js' %}"></script>
   <script src="{% static '3Dscript/js/image-dialog.js' %}"></script>
   <script src="{% static '3Dscript/js/3Dscript.js' %}"></script>
+  <script src="{% static '3Dscript/js/autocomplete.js' %}"></script>
 </body>
 </html>
