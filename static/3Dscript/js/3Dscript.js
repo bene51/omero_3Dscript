@@ -1,5 +1,6 @@
 (function() {
     var accordion;
+    var renderbutton = $("#render-button");
 
     function resizeit() {
         var targetVideoWidth = $("#videoContainer")[0].clientWidth;
@@ -127,7 +128,7 @@
     }
 
     function enableRenderingButton(state) {
-        $('#startRendering').prop("disabled", !state);
+        renderbutton.prop("disabled", !state);
     }
 
     function updateState(basename) {
@@ -235,10 +236,9 @@
     
         onresize();
 
-        $("#startRendering").on("click", function() {
+        renderbutton.on("click", function() {
             startRendering();
         });
-    }
 
     main();
 })();
