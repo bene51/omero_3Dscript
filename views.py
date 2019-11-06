@@ -10,12 +10,6 @@ import fiji
 import logging
 import pid
 
-# FIJI_DIR = "/usr/local/share/Fiji.app/"
-# FIJI_BIN = FIJI_DIR + "ImageJ-linux64"
-
-FIJI_DIR = "/Users/bene/Fiji.app/"
-FIJI_BIN = FIJI_DIR + "Contents/MacOS/ImageJ-macosx"
-
 logger = logging.getLogger(__name__)
 
 @login_required()
