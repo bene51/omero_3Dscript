@@ -121,11 +121,13 @@ def startRendering(request, conn=None, **kwargs):
           fiji.checkFijiPath()
           proc = os.getpid()
           logger.info("proc id = " + str(proc))
+          host = conn.host;
+          logger.info("host = " + str(host))
           #TODO do not try forever
           while True:
                try:
                     with pid.PidFile('3Dscript', force_tmpdir=True) as p:
-                         fiji.startRendering('localhost', \
+                         fiji.startRendering(host, \
                               sessionId, \
                               basename, \
                               image_id, \
