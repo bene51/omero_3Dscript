@@ -319,6 +319,9 @@
                 var repl = txt.substring(0, insertPos) + ui.item.value + " " + txt.substring(insertPos + this.alreadyEnteredLength, txt.length);
                 console.debug("replace: " + repl);
                 this.value = repl;
+                this.selectionStart = this.selectionEnd = insertPos + ui.item.value.length + 1;
+                var e = $.Event('keydown', {keyCode: 32 });
+                $('#script').trigger(e);
                 return false;
             },
             open: function(event, ui) {
