@@ -282,6 +282,20 @@
             if(event.keyCode === $.ui.keyCode.TAB && $(this).data("ui-autocomplete").menu.active) {
                 event.preventDefault();
             }
+            if(event.keyCode === $.ui.keyCode.ENTER) {
+              var caret = $("#script")[0].selectionStart;
+              var text = $("#script").val();
+              if(caret > 0) {
+                var lastChar = text.charAt(caret - 1);
+                console.debug("lastChar = " + lastChar);
+                if(lastChar === ":") {
+                  $("#script")[0].value = text + "\n- ";
+                  event.preventDefault();
+                  var e = $.Event('keydown', {keyCode: 32 });
+                  $('#script').trigger(e);
+                }
+              }
+            }
         });
 
         // https://stackoverflow.com/questions/5643767/jquery-ui-autocomplete-width-not-set-correctly
