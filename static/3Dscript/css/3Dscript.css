@@ -86,6 +86,8 @@ body {
   color: white; /* #005599; */
   border-radius: 0px;
   background-color: #4caf50;
+  /* https://cssgradient.io/ */
+  background: linear-gradient(0deg, rgba(36,82,38,1) 0%, rgba(76,175,80,1) 100%);
 }
 
 #buttons {
