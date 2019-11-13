@@ -342,7 +342,11 @@
                 console.debug("open");
                 var caret = getCaretCoordinates(this, this.selectionEnd - this.alreadyEnteredLength);
                 var width = caret.left;
-                var height = caret.top;// + 15;
+                var height = caret.top;
+                var txt = this.value;
+                var cursor = this.selectionEnd;
+                if(cursor < txt.length)
+                  height = height + 15;
                 ta = $('#script');
                 width > ta.width() ?
                   width = parseInt(ta.position().left + ta.width()) :
