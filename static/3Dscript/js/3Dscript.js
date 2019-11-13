@@ -316,7 +316,7 @@
                 var insertPos = this.selectionEnd - this.alreadyEnteredLength;
                 console.debug("insertPos = "  + insertPos);
                 console.debug("left = " + txt.substring(0, insertPos));
-                var repl = txt.substring(0, insertPos) + ui.item.value + txt.substring(insertPos + this.selectionEnd);
+                var repl = txt.substring(0, insertPos) + ui.item.value + " " + txt.substring(insertPos + this.alreadyEnteredLength, txt.length);
                 console.debug("replace: " + repl);
                 this.value = repl;
                 return false;
