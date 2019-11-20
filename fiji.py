@@ -88,7 +88,7 @@ def startRendering(host,\
 	sbPosition, \
 	sbOffset, \
 	sbLength):
-	send("render %s %s %s %s %s %s %s %s %s %s %s %s %s %s %s\n" % (host, sessionid, basename, imageid, w, h, bbVisible, bbColor, bbLinewidth, sbVisible, sbColor, sbLinewidth, sbPosition.replace(" ", "_"), sbOffset, sbLength))
+	return send("render %s %s %s %s %s %s %s %s %s %s %s %s %s %s %s\n" % (host, sessionid, basename, imageid, w, h, bbVisible, bbColor, bbLinewidth, sbVisible, sbColor, sbLinewidth, sbPosition.replace(" ", "_"), sbOffset, sbLength)).strip()
 
 def getStateAndProgress(basename):
 	state = send('getstate ' + basename + '\n')

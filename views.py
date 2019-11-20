@@ -9,6 +9,7 @@ import traceback
 import fiji
 import logging
 import pid
+import base64
 
 logger = logging.getLogger(__name__)
 
@@ -102,10 +103,7 @@ def startRendering(request, conn=None, **kwargs):
                raise Exception("Cannot retrieve image with id " + str(image_id))
           image_name = image.getName()
           user = conn.getUser().getName();
-          basename = os.path.join(tempfile.gettempdir(), user + "-" + datetime.datetime.now().strftime("%Y-%m-%d-%H-%M-%S"))
-          basename = "/tmp/" + user + "-" + datetime.datetime.now().strftime("%Y-%m-%d-%H-%M-%S")
           s = request.GET['script']
-          writeAnimationFile(s, basename)
           sessionId = conn.c.getSessionId()
           tgtWidth = request.GET['targetWidth']
           tgtHeight = request.GET['targetHeight']
@@ -127,9 +125,10 @@ def startRendering(request, conn=None, **kwargs):
           while True:
                try:
                     with pid.PidFile('3Dscript', force_tmpdir=True) as p:
-                         fiji.startRendering(host, \
+                         basename = fiji.startRendering(host, \
                               sessionId, \
-                              basename, \
+                              base64.urlsafe_b64encode(s), \
+                              # basename, \
                               image_id, \
                               tgtWidth, \
                               tgtHeight, \
@@ -152,12 +151,4 @@ def startRendering(request, conn=None, **kwargs):
           log.close()
           stacktrace = traceback.format_exc()
           return JsonResponse({'error': str(exc), 'stacktrace': stacktrace})
-
-
-
-
-def writeAnimationFile(script, basename):
-     animationFile = basename + ".animation.txt"
-     with open(animationFile, 'w') as f:
-          f.write(script)
 
