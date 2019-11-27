@@ -5,6 +5,7 @@ import threading
 import os
 import logging
 from subprocess import Popen, PIPE
+import base64
 
 logger = logging.getLogger(__name__)
 
@@ -73,8 +74,9 @@ def checkFijiPath():
 		raise Exception("Fiji binary could not be found, please set the FIJI_BIN environment variable")
 
 
-def startRendering(host, sessionid, basename, imageid, w, h):
-	return send("render %s %s %s %s %s %s\n" % (host, sessionid, basename, imageid, w, h)).strip()
+def startRendering(host, sessionid, script, imageid, w, h):
+	return send("render %s %s %s %s %s %s\n" % (host, sessionid, base64.urlsafe_b64encode(script), imageid, w, h)).strip()
+
 
 def getStateAndProgress(basename):
         positionProgressState = send('getstate ' + basename + '\n')

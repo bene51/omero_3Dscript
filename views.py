@@ -9,7 +9,6 @@ import traceback
 import fiji
 import logging
 import pid
-import base64
 
 logger = logging.getLogger(__name__)
 
@@ -118,8 +117,7 @@ def startRendering(request, conn=None, **kwargs):
                     with pid.PidFile('3Dscript', force_tmpdir=True) as p:
                          basename = fiji.startRendering(host, \
                               sessionId, \
-                              base64.urlsafe_b64encode(s), \
-                              # basename, \
+                              s, \
                               image_id, \
                               tgtWidth, \
                               tgtHeight)
