@@ -73,22 +73,8 @@ def checkFijiPath():
 		raise Exception("Fiji binary could not be found, please set the FIJI_BIN environment variable")
 
 
-def startRendering(host,\
-	sessionid, \
-	basename, \
-	imageid, \
-	w, \
-	h, \
-	bbVisible, \
-	bbColor, \
-	bbLinewidth, \
-	sbVisible, \
-	sbColor, \
-	sbLinewidth, \
-	sbPosition, \
-	sbOffset, \
-	sbLength):
-	return send("render %s %s %s %s %s %s %s %s %s %s %s %s %s %s %s\n" % (host, sessionid, basename, imageid, w, h, bbVisible, bbColor, bbLinewidth, sbVisible, sbColor, sbLinewidth, sbPosition.replace(" ", "_"), sbOffset, sbLength)).strip()
+def startRendering(host, sessionid, basename, imageid, w, h):
+	return send("render %s %s %s %s %s %s\n" % (host, sessionid, basename, imageid, w, h)).strip()
 
 def getStateAndProgress(basename):
 	state = send('getstate ' + basename + '\n')
@@ -108,8 +94,3 @@ def run(host, sessionid, basename, imageid, w, h):
 			break
 		time.sleep(0.1)
 
-if False:
-	host = 'omero'
-	sessionid = '9et1v5f8ftzswwqwnkwh5a7630bknk4x'
-	basename = '/tmp/bschmid-2019-08-23-15-43-24'
-	run(host, sessionid, basename, 1, 256, 256)

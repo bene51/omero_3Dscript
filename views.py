@@ -107,15 +107,6 @@ def startRendering(request, conn=None, **kwargs):
           sessionId = conn.c.getSessionId()
           tgtWidth = request.GET['targetWidth']
           tgtHeight = request.GET['targetHeight']
-          bbVisible = request.GET['bbVisible']
-          bbColor = request.GET['bbColor']
-          bbLinewidth = request.GET['bbLinewidth']
-          sbVisible = request.GET['sbVisible']
-          sbColor = request.GET['sbColor']
-          sbLinewidth = request.GET['sbLinewidth']
-          sbPosition = request.GET['sbPosition']
-          sbOffset = request.GET['sbOffset']
-          sbLength = request.GET['sbLength']
           fiji.checkFijiPath()
           proc = os.getpid()
           logger.info("proc id = " + str(proc))
@@ -131,16 +122,7 @@ def startRendering(request, conn=None, **kwargs):
                               # basename, \
                               image_id, \
                               tgtWidth, \
-                              tgtHeight, \
-                              bbVisible, \
-                              bbColor, \
-                              bbLinewidth, \
-                              sbVisible, \
-                              sbColor, \
-                              sbLinewidth, \
-                              sbPosition, \
-                              sbOffset, \
-                              sbLength)
+                              tgtHeight)
                          break
                except pid.PidFileAlreadyLockedError:
                          print("already locked");

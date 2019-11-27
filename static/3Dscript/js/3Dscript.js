@@ -81,15 +81,6 @@
         var script = $("#script")[0].value;
         var targetWidth = $("#tgtWidth")[0].value;
         var targetHeight = $("#tgtHeight")[0].value;
-        var bbVisible = $("#bbswitch")[0].checked;
-        var bbColor = $("#bbcolor")[0].value;
-        var bbLinewidth = $("#bblinewidth")[0].value;
-        var sbVisible = $("#sbswitch")[0].checked;
-        var sbColor = $("#sbcolor")[0].value;
-        var sbLinewidth = $("#sblinewidth")[0].value;
-        var sbPosition = $("#sbposition")[0].value;
-        var sbOffset = $("#sboffset")[0].value;
-        var sbLength = $("#sblength")[0].value;
         $.ajax({
             url: '/omero_3dscript/startRendering',
             data: {
@@ -97,15 +88,6 @@
                 script: script,
                 targetWidth: targetWidth,
                 targetHeight: targetHeight,
-                bbVisible: bbVisible,
-                bbColor: bbColor,
-                bbLinewidth: bbLinewidth,
-                sbVisible: sbVisible,
-                sbColor: sbColor,
-                sbLinewidth: sbLinewidth,
-                sbPosition: sbPosition,
-                sbOffset: sbOffset,
-                sbLength: sbLength
             },
             dataType: 'json',
             success: function(data) {

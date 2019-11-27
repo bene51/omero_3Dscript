@@ -3,24 +3,10 @@ $(function() {
     settingsbutton = $("#settings"),
     tgtWidth = $("#tgtWidth"),
     tgtHeight = $("#tgtHeight"),
-    bbswitch = $("#bbswitch"),
-    bbcolor = $("#bbcolor"),
-    bblinewidth = $("#bblinewidth"),
-    sbswitch = $("#sbswitch"),
-    sbcolor = $("#sbcolor"),
-    sblinewidth = $("#sblinewidth"),
-    sblength = $("#sblength"),
 
     allFields = $( [] ).
         add(tgtWidth).
         add(tgtHeight).
-        add(bbswitch).
-        add(bbcolor).
-        add(bblinewidth).
-        add(sbswitch).
-        add(sbcolor).
-        add(sblinewidth).
-        add(sblength);
     tips = $( ".validateTips" );
 
     function updateTips( t ) {
@@ -72,9 +58,6 @@ $(function() {
 
         valid = valid && checkInteger(tgtWidth, "Output width", 50);
         valid = valid && checkInteger(tgtHeight, "Output height", 50);
-        valid = valid && checkNumber(bblinewidth, "Bounding box width", 0);
-        valid = valid && checkNumber(sblinewidth, "Scalebar width", 0);
-        valid = valid && checkNumber(sblength, "Scalebar length", 0);
 
         if(valid)
             dialog.dialog("close");
