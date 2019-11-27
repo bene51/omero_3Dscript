@@ -41,8 +41,9 @@ def getStateAndProgress(request, conn=None, **kwargs):
      logger.info("got state from fiji: " + state)
      exc = ''
      if state.startswith('ERROR'):
-          with open(basename + ".err") as f:
-               exc = f.read()
+          exc = fiji.getStacktrace(basename)
+          #with open(basename + ".err") as f:
+          #     exc = f.read()
      logger.info("return state: " + state)
      return JsonResponse({'state': state, 'progress': progress, 'position': position, 'stacktrace': exc})
 

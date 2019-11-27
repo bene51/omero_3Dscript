@@ -77,6 +77,9 @@ def checkFijiPath():
 def startRendering(host, sessionid, script, imageid, w, h):
 	return send("render %s %s %s %s %s %s\n" % (host, sessionid, base64.urlsafe_b64encode(script), imageid, w, h)).strip()
 
+def getStacktrace(basename):
+    return base64.urlsafe_b64decode(send("getstacktrace %s\n" % (basename)).strip())
+
 
 def getStateAndProgress(basename):
         positionProgressState = send('getstate ' + basename + '\n')
