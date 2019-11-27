@@ -38,14 +38,14 @@ def index(request, conn=None, **kwargs):
 def getStateAndProgress(request, conn=None, **kwargs):
      basename = request.GET['basename']
      logger.info("getting state from fiji: ")
-     state, progress = fiji.getStateAndProgress(basename)
+     state, progress, position = fiji.getStateAndProgress(basename)
      logger.info("got state from fiji: " + state)
      exc = ''
      if state.startswith('ERROR'):
           with open(basename + ".err") as f:
                exc = f.read()
      logger.info("return state: " + state)
-     return JsonResponse({'state': state, 'progress': progress, 'stacktrace': exc})
+     return JsonResponse({'state': state, 'progress': progress, 'position': position, 'stacktrace': exc})
 
 @login_required()
 def cancelRendering(request, conn=None, **kwargs):

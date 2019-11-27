@@ -77,9 +77,12 @@ def startRendering(host, sessionid, basename, imageid, w, h):
 	return send("render %s %s %s %s %s %s\n" % (host, sessionid, basename, imageid, w, h)).strip()
 
 def getStateAndProgress(basename):
-	state = send('getstate ' + basename + '\n')
-	progress = float(send('getprogress ' + basename + '\n'))
-	return state, progress
+        positionProgressState = send('getstate ' + basename + '\n')
+        toks = positionProgressState.split(" ")
+        position = int(toks[0])
+        progress = float(toks[1])
+        state = toks[2]
+	return state, progress, position
 
 def cancelRendering(basename):
 	send('cancel ' + basename + '\n')
@@ -87,7 +90,7 @@ def cancelRendering(basename):
 def run(host, sessionid, basename, imageid, w, h):
 	startRendering(host, sessionid, basename, imageid, w, h)
 	while True:
-		resp, prog = getStateAndProgress(basename)
+		resp, prog, position = getStateAndProgress(basename)
 		if resp and resp.startswith('FINISHED'):
 			break
 		if resp and resp.startswith('ERROR'):

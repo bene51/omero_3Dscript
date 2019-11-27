@@ -155,6 +155,7 @@
                 },
                 dataType: 'json',
                 success: function(data) {
+                    position = data.position; // TODO show the position visually on the frontend
                     if(data.state.startsWith('ERROR')) {
                         setStateAndProgress('ERROR', 100 * data.progress, data.stacktrace);
                         enableRenderingButton(true);
