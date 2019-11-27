@@ -273,6 +273,22 @@ class Keyword {
     map["maximum intensity"]        = 2;
     return map;
   }
+  static makePositionMap() {
+    var map = {};
+    map["object - lower left front"]  = 0;
+    map["object - lower right front"] = 1;
+    map["object - upper left front"]  = 2;
+    map["object - upper right front"] = 3;
+    map["object - lower left back"]   = 4;
+    map["object - lower right back"]  = 5;
+    map["object - upper left back"]   = 6;
+    map["object - upper right back"]  = 7;
+    map["view - lower left"]          = 8;
+    map["view - lower right"]         = 9;
+    map["view - upper left"]          = 10;
+    map["view - upper right"]         = 11;
+    return map;
+  }
 }
 
 const ChannelKeywords = {
@@ -317,7 +333,16 @@ const ChannelKeywords = {
 const NonChannelKeywords = {
   BG_COLOR            : new Keyword("background color",    ["<red>", "<green>", "<blue>"], Keyword.makeColorMap()),
   TIMEPOINT           : new Keyword("timepoint",           ["<timepoint>"]),
-  RENDERING_ALGORITHM : new Keyword("rendering algorithm", ["<algorithm>"], Keyword.makeRenderingAlgorithmMap())
+  RENDERING_ALGORITHM : new Keyword("rendering algorithm", ["<algorithm>"], Keyword.makeRenderingAlgorithmMap()),
+	SCALEBAR_VISIBILITY : new Keyword("scalebar visibility", ["<on/off>"], Keyword.makeOnOffMap()),
+	SCALEBAR_LENGTH     : new Keyword("scalebar length",     ["<length>"]),
+	SCALEBAR_COLOR      : new Keyword("scalebar color",      ["<red>", "<green>", "<blue>"], Keyword.makeColorMap()),
+	SCALEBAR_WIDTH      : new Keyword("scalebar width",      ["<width>"]),
+	SCALEBAR_POSITION   : new Keyword("scalebar position",   ["<position>"], Keyword.makePositionMap()),
+	SCALEBAR_OFFSET     : new Keyword("scalebar offset",     ["<offset>"]),
+	BOUNDINGBOX_VISIBILITY : new Keyword("bounding box visibility", ["<on/off>"], Keyword.makeOnOffMap()),
+	BOUNDINGBOX_COLOR   : new Keyword("bounding box color", ["<red>", "<green>", "<blue>"], Keyword.makeColorMap()),
+	BOUNDINGBOX_WIDTH   : new Keyword("bounding box width", ["<width>"])
 };
 
 function keywordNames(keywords) {
