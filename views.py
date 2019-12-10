@@ -6,7 +6,7 @@ import os
 import datetime
 import shutil
 import traceback
-import fiji
+from . import fiji
 import logging
 import pid
 

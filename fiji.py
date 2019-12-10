@@ -66,7 +66,7 @@ def send(msg):
 	data = None
 	while not data:
 		data = s.recv(1024)
-	print 'Received', repr(data)
+	print('Received' + repr(data))
 	return data
 
 def checkFijiPath():
@@ -78,15 +78,15 @@ def startRendering(host, sessionid, script, imageid, w, h):
 	return send("render %s %s %s %s %s %s\n" % (host, sessionid, base64.urlsafe_b64encode(script), imageid, w, h)).strip()
 
 def getStacktrace(basename):
-    return base64.urlsafe_b64decode(send("getstacktrace %s\n" % (basename)).strip())
+	return base64.urlsafe_b64decode(send("getstacktrace %s\n" % (basename)).strip())
 
 
 def getStateAndProgress(basename):
-        positionProgressState = send('getstate ' + basename + '\n')
-        toks = positionProgressState.split(" ")
-        position = int(toks[0])
-        progress = float(toks[1])
-        state = toks[2]
+	positionProgressState = send('getstate ' + basename + '\n')
+	toks = positionProgressState.split(" ")
+	position = int(toks[0])
+	progress = float(toks[1])
+	state = toks[2]
 	return state, progress, position
 
 def cancelRendering(basename):
