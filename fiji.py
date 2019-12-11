@@ -62,12 +62,12 @@ def send(msg):
 		if not co.is_set(): #timeout
 			raise Exception("Unable to start Fiji"); #TODO kill fiji
 		return send(msg)
-	s.sendall(msg)
+	s.sendall(msg.encode('utf-8'))
 	data = None
 	while not data:
 		data = s.recv(1024)
 	print('Received' + repr(data))
-	return data
+	return data.decode('utf-8')
 
 def checkFijiPath():
 	if getFijiBin() is None:
@@ -75,10 +75,10 @@ def checkFijiPath():
 
 
 def startRendering(host, sessionid, script, imageid, w, h):
-	return send("render %s %s %s %s %s %s\n" % (host, sessionid, base64.urlsafe_b64encode(script), imageid, w, h)).strip()
+	return send("render %s %s %s %s %s %s\n" % (host, sessionid, base64.urlsafe_b64encode(script.encode('utf-8')).decode('utf-8'), imageid, w, h)).strip()
 
 def getStacktrace(basename):
-	return base64.urlsafe_b64decode(send("getstacktrace %s\n" % (basename)).strip())
+	return base64.urlsafe_b64decode(send("getstacktrace %s\n" % (basename)).strip().encode('utf-8')).decode('utf-8')
 
 
 def getStateAndProgress(basename):
