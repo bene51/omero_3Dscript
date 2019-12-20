@@ -27,14 +27,14 @@ def getFijiBin():
 	return None
 
 def startFiji(co):
-	print("startFiji")
+	logger.info("startFiji")
 	stdoutput = ""
 	try:
 		log = open("/tmp/fiji.out", 'w')
 		err = open("/tmp/fiji.err", 'w')
 		fijibin = getFijiBin()
 		cmd = [fijibin, '--console', '--headless', '-eval', 'run("3Dscript Server", "");']
-		print(cmd[4])
+		logger.info(' '.join(cmd))
 		p = Popen(cmd, stdout=PIPE, stderr=err)
 		for line in iter(p.stdout.readline, b''):
 			stdoutput = stdoutput + line
