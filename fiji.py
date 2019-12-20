@@ -66,7 +66,6 @@ def send(msg):
 	data = None
 	while not data:
 		data = s.recv(1024)
-	print('Received' + repr(data))
 	return data.decode('utf-8')
 
 def checkFijiPath():
