@@ -37,6 +37,8 @@ def startFiji(co):
 		logger.info(' '.join(cmd))
 		p = Popen(cmd, stdout=PIPE, stderr=err)
 		for line in iter(p.stdout.readline, b''):
+			line = line.decode('utf-8')
+			logger.info(line)
 			stdoutput = stdoutput + line
 			log.write(line)
 			log.flush()
