@@ -123,7 +123,7 @@ def startRendering(request, conn=None, **kwargs):
                               tgtWidth, \
                               tgtHeight)
                          break
-               except pid.PidFileAlreadyLockedError:
+               except pid.PidFileError:
                          print("already locked");
           return JsonResponse({'basename': basename})
      except Exception as exc:
