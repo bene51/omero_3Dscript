@@ -62,7 +62,7 @@ def send(msg):
 		# with co:
 		co.wait(15.0) #seconds
 		if not co.is_set(): #timeout
-			raise Exception("Unable to start Fiji"); #TODO kill fiji
+			raise Exception("Unable to start Fiji") #TODO kill fiji
 		return send(msg)
 	s.sendall(msg.encode('utf-8'))
 	data = None
