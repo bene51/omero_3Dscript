@@ -1,3 +1,4 @@
+<!DOCTYPE html>
 <html>
 
 <head>
@@ -13,7 +14,7 @@
 
 
 <body>
-  <img src="{% static '3Dscript/images/3DscriptLogo.png' %}" id="logo"></img>
+  <img src="{% static '3Dscript/images/3DscriptLogo.png' %}" id="logo">
 
   <div id="header">
     <span id="headertxt">{{ image_name }}</span>
@@ -64,7 +65,6 @@ From frame 0 to frame 200 rotate by 360 degrees horizontally</textarea>
         <input type="number" name="tgtWidth" id="tgtWidth" value="600" class="number ui-widget-content ui-corner-all">
         <span class="leftmargin rightmargin">x</span>
         <input type="number" name="tgtHeight" id="tgtHeight" value="450" class="number ui-widget-content ui-corner-all"><br>
-      </fieldset>
         <!--input type="password" name="password" id="password" value="xxxxxxx" class="text ui-widget-content ui-corner-all"-->
         <!-- Allow form submission with keyboard without duplicating the dialog button -->
         <input type="submit" tabindex="-1" style="position:absolute; top:-1000px">

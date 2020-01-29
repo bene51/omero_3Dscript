@@ -24,10 +24,6 @@ function getCompletions(text, caret) {
 }
 
 class MacroExtractor {
-  scriptStart = [];
-  functionStart = [];
-  functionEnd = [];
-  scripts = {};
 
   constructor(textbuffer) {
     this.text = textbuffer;
@@ -183,13 +179,11 @@ class Preprocessor {
 }
 
 class NumberOrMacro {
-  v = -1;
-  functionName = null;
-  macro = null;
 
   constructor(v = -1, functionName = null) {
     this.v = v;
     this.functionName = null;
+    this.macro = null;
   }
 
 	isMacro() {
@@ -234,9 +228,6 @@ const Transition = {
 };
 
 class Keyword {
-  keyword = "";
-  autocompletionDescription = [];
-  replacementMap = {};
 
   /*
    * keyword: String
