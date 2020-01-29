@@ -164,7 +164,13 @@
                         createAnnotation(basename);
                         enableRenderingButton(true);
                     }
+                    else if (data.state.startsWith('QUEUED')) {
+                        setStateAndProgress(data.state, 100 * data.progress);
+                        QueueDialog.setPosition(position - 1);
+                        updateState(basename);
+                    }
                     else {
+                        QueueDialog.close();
                         setStateAndProgress(data.state, 100 * data.progress);
                         updateState(basename);
                     }

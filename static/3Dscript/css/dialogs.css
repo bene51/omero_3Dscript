@@ -32,3 +32,36 @@
   opacity: 0.75;
 }
 
+/* queue dialog */
+.ui-dialog-titlebar {
+  /* display: none; */
+  background: rgba(76, 175, 80, 1);
+}
+#bubbleoverlay {
+  z-index: 1;
+  opacity: 0.5;
+  font-size: 2em;
+  font-weight: bold;
+  position: absolute;
+  top: 0px;
+  left: 0px;
+}
+#imagecontainer {
+  position: relative;
+}
+#imageoverlay {
+  z-index: 2;
+  opacity: 0.8;
+  background-color: rgba(76, 175, 80, 1);
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 10%;
+  text-align: center;
+  font-size: 2em;
+  font-weight: bold;
+  color: white;
+  line-height: 60px;
+}
+

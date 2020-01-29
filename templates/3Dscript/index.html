@@ -7,6 +7,7 @@
   <script src="{% static '3Dscript/3rdparty/jquery-ui-1.12.1/external/jquery/jquery.js' %}"></script>
   <script src="{% static '3Dscript/3rdparty/jquery-ui-1.12.1/jquery-ui.min.js' %}"></script>
   <script src="{% static '3Dscript/3rdparty/textarea-caret-position.js' %}"></script>
+  <script src="{% static '3Dscript/3rdparty/svg.min.js' %}"></script>
   <link rel="stylesheet" href="{% static '3Dscript/3rdparty/jquery-ui-1.12.1/jquery-ui.css' %}">
   <link rel="stylesheet" href="{% static '3Dscript/css/3Dscript.css' %}">
   <link rel="stylesheet" href="{% static '3Dscript/css/dialogs.css' %}">
@@ -71,8 +72,27 @@ From frame 0 to frame 200 rotate by 360 degrees horizontally</textarea>
       </fieldset>
     </form>
   </div>
+
+  <!-- queue dialog -->
+  <div id="dialog-queue" title="Other processes are currently queued">
+    <div id="imagecontainer">
+      <img width=800 height=600 src="{% static '3Dscript/images/queue.png' %}">
+      <svg id="bubbleoverlay" width="800" height="600">
+        <g id="bgroup">
+  background-color: rgba(76, 175, 80, 1);
+          <ellipse id="bubble" cx="0" cy="0" rx="40" ry="25" stroke-width="0" fill="rgba(76, 175, 80, 1)"></ellipse>
+          <text id="blabel" x="0" y="10" fill="white" text-anchor="middle">3</text>
+        </g>
+      </svg>
+      <div id="imageoverlay">
+        You are number X in line
+      </div>
+    </div>
+  </div>
+
   <script src="{% static '3Dscript/js/settings-dialog.js' %}"></script>
   <script src="{% static '3Dscript/js/image-dialog.js' %}"></script>
+  <script src="{% static '3Dscript/js/queue.js' %}"></script>
   <script src="{% static '3Dscript/js/3Dscript.js' %}"></script>
   <script src="{% static '3Dscript/js/autocomplete.js' %}"></script>
 </body>
