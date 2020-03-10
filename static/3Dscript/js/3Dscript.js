@@ -276,10 +276,15 @@
               var text = $("#script").val();
               if(caret > 0) {
                 var lastChar = text.charAt(caret - 1);
-                console.debug("lastChar = " + lastChar);
+                var textBefore = text.substring(0, caret);
+                var textAfter = text.substring(caret);
                 if(lastChar === ":") {
-                  $("#script")[0].value = text + "\n- ";
+                  let newtext = textBefore + "\n- " + textAfter;
+                  $("#script")[0].value = newtext;
                   event.preventDefault();
+                  caret = textBefore.length + 3;
+                  $("#script")[0].selectionStart = caret;
+                  $("#script")[0].selectionEnd = caret;
                   var e = $.Event('keydown', {keyCode: 32 });
                   $('#script').trigger(e);
                 }
