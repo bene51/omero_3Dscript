@@ -200,14 +200,14 @@
                     var annotationId = data.annotationId;
                     if(data.isVideo) {
                         $('#videoContainer')[0].innerHTML = `
-    <video id="preview" style="margin-left: auto; margin-right: auto; display: block; position: relative; top: 50%; transform: translateY(-50%);" controls>
+    <video id="preview" style="margin-left: auto; margin-right: auto; display: block; position: relative; top: 50%; transform: translateY(-50.001%);" controls>
       <source src="/webclient/annotation/${annotationId}" type="video/mp4">
       Your browser doesn't support this video.
     </video>`.trim();
                     }
                     else {
                         $('#videoContainer')[0].innerHTML = `
-    <img id="preview" style="margin-left: auto; margin-right: auto; display: block; position: relative; top: 50%; transform: translateY(-50%);" src="/webclient/annotation/${annotationId}" type="image/png">
+    <img id="preview" style="margin-left: auto; margin-right: auto; display: block; position: relative; top: 50%; transform: translateY(-50.001%);" src="/webclient/annotation/${annotationId}" type="image/png">
     </img>`.trim();
                     }
                     resizeit();
