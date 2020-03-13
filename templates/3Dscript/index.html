@@ -3,6 +3,7 @@
 
 <head>
   <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>3DScript</title>
   <script src="{% static '3Dscript/3rdparty/jquery-ui-1.12.1/external/jquery/jquery.js' %}"></script>
   <script src="{% static '3Dscript/3rdparty/jquery-ui-1.12.1/jquery-ui.min.js' %}"></script>
@@ -15,25 +16,28 @@
 
 
 <body>
-  <img src="{% static '3Dscript/images/3DscriptLogo.png' %}" id="logo">
+  <div id="wrapper">
 
-  <div id="header">
-    <span id="headertxt">{{ image_name }}</span>
-    <button id="imagebutton"></button>
-  </div>
-
-  <div id="videoContainer"></div>
-
-  <div id="accordion">
-    <div id="progress">
-      <div id="bar"></div>
-      <div id="barlabel"> </div>
+    <div id="header">
+      <span id="headertxt">{{ image_name }}</span>
+      <button id="imagebutton"></button>
     </div>
-    <div id="backtrace"></div>
-  </div>
+    <img src="{% static '3Dscript/images/3DscriptLogo.png' %}" id="logo">
 
-  <div style="width:600px; margin-left: auto; margin-right: auto;">
-    <textarea id="script" name="script">
+  <div id="content">
+    <div id="videoContainer">
+      <div id="placeholder"></div>
+    </div>
+
+    <div id="accordion">
+      <div id="progress">
+        <div id="bar"></div>
+        <div id="barlabel"> </div>
+      </div>
+      <div id="backtrace"></div>
+    </div>
+
+    <textarea id="script" name="script" rows="15">
 At frame 0 zoom by a factor of 0.9
 From frame 0 to frame 200 rotate by 360 degrees horizontally</textarea>
     <div id="buttons">
@@ -42,9 +46,9 @@ From frame 0 to frame 200 rotate by 360 degrees horizontally</textarea>
       <button name="settings" id="settings" value="">Settings</button>
     </div>
 
-    <div id="footer">
-      &copy;Benjamin Schmid, Optical Imaging Centre Erlangen, University of Erlangen-Nuremberg
-    </div>
+  </div>
+  <div id="footer">
+    &copy;Benjamin Schmid, Optical Imaging Centre Erlangen, University of Erlangen-Nuremberg
   </div>
 
 

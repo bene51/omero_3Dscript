@@ -5,51 +5,6 @@
     var basename;
     var cancelled = false;
 
-    function resizeit() {
-        var targetVideoWidth = $("#videoContainer")[0].clientWidth;
-        var targetVideoHeight = $("#videoContainer")[0].clientHeight;
-        console.log("tgtw = " + targetVideoWidth + " tgth = " + targetVideoHeight);
-        var targetAspect = targetVideoWidth / targetVideoHeight;
-
-        var previews = $("#preview");
-        if(previews.length > 0) {
-            var preview = previews[0];
-            if(preview.tagName == "VIDEO") {
-                preview.addEventListener("loadedmetadata", function(e) {
-                    var videoWidth = this.videoWidth;
-                    var videoHeight = this.videoHeight;
-                    var aspect = videoWidth / videoHeight;
-                    if(aspect > targetAspect) {
-                        // keep width and let hight be adjusted automatically
-                        preview.width = targetVideoWidth;
-                    }
-                    else {
-                        // keep height and let width be adjusted automatically
-                        preview.height = targetVideoHeight;
-                    }
-                    console.log("videoWidth = " + videoWidth);
-                    console.log("videoHeight = " + videoHeight);
-                    console.log("videoWidth/videoHeight = " + (videoWidth / videoHeight));
-                });
-            }
-            else if(preview.tagName == "IMG") {
-                preview.onload = function() {
-                    var videoWidth = preview.clientWidth;
-                    var videoHeight = preview.clientHeight;
-                    var aspect = videoWidth / videoHeight;
-                    if(aspect > targetAspect) {
-                        // keep width and let hight be adjusted automatically
-                        preview.width = targetVideoWidth;
-                    }
-                    else {
-                        // keep height and let width be adjusted automatically
-                        preview.height = targetVideoHeight;
-                    }
-                };
-            }
-        }
-    }
-
     function cancelRendering() {
         enableCancelButton(false);
         $.ajax({
@@ -200,17 +155,16 @@
                     var annotationId = data.annotationId;
                     if(data.isVideo) {
                         $('#videoContainer')[0].innerHTML = `
-    <video id="preview" style="margin-left: auto; margin-right: auto; display: block; position: relative; top: 50%; transform: translateY(-50.001%);" controls>
+    <video class="preview"  controls>
       <source src="/webclient/annotation/${annotationId}" type="video/mp4">
       Your browser doesn't support this video.
     </video>`.trim();
                     }
                     else {
                         $('#videoContainer')[0].innerHTML = `
-    <img id="preview" style="margin-left: auto; margin-right: auto; display: block; position: relative; top: 50%; transform: translateY(-50.001%);" src="/webclient/annotation/${annotationId}" type="image/png">
+    <img class="preview" src="/webclient/annotation/${annotationId}" type="image/png">
     </img>`.trim();
                     }
-                    resizeit();
                     setStateAndProgress('FINISHED', 100);
                 }
             }
@@ -219,17 +173,6 @@
 
     function onresize() {
         var left = ($(window).width() - 600) / 2.0;
-        // devide the left space into 5 parts,
-        // 4 will be covered by the logo, the 5th
-        // is gap
-        var gap = left / 5.0;
-        var logow = gap * 4;
-        if(logow > 150)
-            logow = 150;
-        if(logow < 50)
-            logow = 0;
-        $("#logo").width(logow + 'px');
-        $("#logo").height(logow + 'px');
         $("#header").css({"padding-left": left + "px"});
     }
 
@@ -242,18 +185,6 @@
     
         $(window).resize(function() {
             onresize();
-        });
-    
-        $(window).scroll(function() {
-            var et = $("#logo").offset().top;
-            var wt = $(window).scrollTop();
-            var absY = et - wt;
-            if(wt > 65) {
-                $("#logo").css({'top': wt + 5});
-            }
-            else {
-                $("#logo").css({'top': 60});
-            }
         });
     
         onresize();

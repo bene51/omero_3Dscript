@@ -1,6 +1,19 @@
+html, body {
+  padding: 0;
+  margin: 0;
+  height: 100%;
+}
+
+#wrapper {
+  min-height: 100vh;
+  position: relative;
+  padding: 10px;
+  box-sizing: border-box;
+}
+
 .ui-accordion {
   font-size: 0.8em;
-  width: 600px;
+  width: 100%;
   margin: 5px auto;
 }
 .ui-accordion .ui-accordion-content {
@@ -75,13 +88,11 @@ body {
 
 #header {
   box-sizing: border-box;
-  width: 600px;
   width: 100%;
   font-size: 1.5em;
   height: 30px;
   text-align: left;
-  padding-left: 0.0em;
-  margin-top: 20px;
+  margin-top: 10px;
   margin-bottom: 10px;
   color: white; /* #005599; */
   border-radius: 0px;
@@ -90,16 +101,31 @@ body {
   background: linear-gradient(0deg, rgba(36,82,38,1) 0%, rgba(76,175,80,1) 100%);
 }
 
+#content {
+  max-width: 600px;
+  margin-left: auto;
+  margin-right: auto;
+  margin-bottom: 40px;
+  box-sizing: border-box;
+}
+
 #buttons {
   margin-top: 5px;
 }
 
 #script {
-  width: 600px;
+  width: 100%;
+  /* height: 250px; */
+  /* 625 = 
+   *   20 + 30 + 10 + 450 + 30 + 25 + 20 + 10 + 30
+   */
+  /* min-height: calc(100vh - 625px); */
   height: 250px;
   font-family: monospace;
   font-size: 10pt;
   line-height: 15px;
+  box-sizing: border-box;
+  padding: 0;
 }
 
 .ui-autocomplete {
@@ -129,48 +155,55 @@ a.ui-button:active,
 
 #videoContainer {
   color: white;
-  width: 600px;
-  height: 450px;
-  background-color: black;
+  width: 100%;
+  background-color: white;
   margin-left: auto;
   margin-right: auto;
   border: black solid 1px;
+  box-sizing: border-box;
 }
 
-video #preview {
+.preview {
   margin-left: auto;
   margin-right: auto;
   display: block;
   position: relative;
-  top: 50%;
-  transform: translateY(-50.001%);
+  width: 100%;
 }
 
-img #preview {
-  margin-left: auto;
-  margin-right: auto;
-  display: block;
-  position: relative;
-  top: 50%;
-  transform: translateY(-50.001%);
+/* https://www.w3schools.com/howto/howto_css_aspect_ratio.asp */
+#placeholder {
+  width: 100%;
+  background-color: black;
+  padding-top: 75%;
 }
 
 #footer {
   font-size: 0.8em;
   text-align: center;
   color: #888;
-  width: 100%;
   border-top: solid 1px #888;
-  margin-top: 4em;
-  padding-top: 5px;
-  padding-bottom: 5px;
+  bottom: 5px;
+  left: 10px;
+  right: 10px;
+  box-sizing: border-box;
+  position: absolute;
 }
 
 #logo {
   float: left;
-  width: 200px;
-  height: 200px;
-  position: absolute;
-  top: 60px;
+  top: 10px;
+  position: -webkit-sticky;
+  position: sticky;
+  min-width: 100px;
+  max-width: 150px;
+  width: 12vw; /* 100 / (100 + 600 + 100) */
+  display: block;
+}
+
+@media screen and (max-width: 850px) {
+  #logo {
+    display: none;
+  }
 }
 
