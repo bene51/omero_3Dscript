@@ -229,6 +229,8 @@
             ul.css("width: 100%;");
         }
 
+        $("#script").autogrow();
+
         $("#script").autocomplete({
             minLength: 0,
             delay: 0,
