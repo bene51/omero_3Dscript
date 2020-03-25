@@ -42,6 +42,7 @@ At frame 0 zoom by a factor of 0.9
 From frame 0 to frame 200 rotate by 360 degrees horizontally</textarea>
     <div id="buttons">
       <button name="render-button" id="render-button" value="">Render</button>
+      <button name="render-multiple-button" id="render-multiple-button" value="">Render Multiple</button>
       <button name="cancel-button" id="cancel-button" value="">Cancel</button>
       <button name="settings" id="settings" value="">Settings</button>
     </div>
@@ -58,6 +59,15 @@ From frame 0 to frame 200 rotate by 360 degrees horizontally</textarea>
     <form>
       <label for="imageId">New image ID</label>
       <input type="number" name="imageId" id="imageId" value="{{imageId}}" class="leftmargin number ui-widget-content ui-corner-all">
+    </form>
+  </div>
+
+  <!-- image link dialog -->
+  <div id="dialog-render-multiple" title="Images">
+    <p class="validateTipsRenderMultiple"> </p>
+    <form>
+      <label for="imagelinks">Link to images</label>
+      <input type="text" size="30" name="imagelinks" id="imagelinks" value="" class="leftmargin ui-widget-content ui-corner-all">
     </form>
   </div>
 
@@ -96,6 +106,7 @@ From frame 0 to frame 200 rotate by 360 degrees horizontally</textarea>
 
   <script src="{% static '3Dscript/js/settings-dialog.js' %}"></script>
   <script src="{% static '3Dscript/js/image-dialog.js' %}"></script>
+  <script src="{% static '3Dscript/js/render-multiple-dialog.js' %}"></script>
   <script src="{% static '3Dscript/js/queue.js' %}"></script>
   <script src="{% static '3Dscript/js/autocomplete.js' %}"></script>
   <script src="{% static '3Dscript/js/autogrow.js' %}"></script>

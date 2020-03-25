@@ -1,6 +1,7 @@
 (function() {
     var accordion;
     var renderbutton = $("#render-button");
+    var rendermultiplebutton = $("#render-multiple-button");
     var cancelbutton = $("#cancel-button");
     var basename;
     var cancelled = false;
@@ -25,14 +26,15 @@
         });
     }
 
-    function startRendering() {
-        cancelled = false;
-        enableRenderingButton(false);
-        $("#backtrace")[0].innerHTML = "";
-	setStateAndProgress("Starting", 2);
-        accordion.accordion("refresh");
-        accordion.accordion("option", "active", false);
-        var imageId = $("#imageId")[0].value;
+    function startRendering(imageId, runInBackground=false) {
+        if(!runInBackground) {
+            cancelled = false;
+            enableRenderingButton(false);
+            $("#backtrace")[0].innerHTML = "";
+            setStateAndProgress("Starting", 2);
+            accordion.accordion("refresh");
+            accordion.accordion("option", "active", false);
+        }
         var script = $("#script")[0].value;
         var targetWidth = $("#tgtWidth")[0].value;
         var targetHeight = $("#tgtHeight")[0].value;
@@ -52,15 +54,25 @@
                     enableRenderingButton(true);
                 }
                 else {
-                    basename = data.basename;
-                    $('#bar').width(1 + '%');
-                    updateState(basename);
+                    if(!runInBackground) {
+                        basename = data.basename;
+                        $('#bar').width(1 + '%');
+                        updateState(basename);
+                    }
                 }
             },
             error: function(xhr, ajaxOptions, thrownError) {
                 console.debug("error in startRendering " + thrownError);
             }
         });
+    }
+
+    function startRenderingMultiple(imageIds) {
+        console.debug("startRenderingMultiple()");
+        console.debug(imageIds);
+        for(var i = 0; i < imageIds.length - 1; i++)
+            startRendering(imageIds[i], true);
+	startRendering(imageIds[imageIds.length - 1], false);
     }
 
     function setStateAndProgress(state, progress, stacktrace=null) {
@@ -190,8 +202,13 @@
         onresize();
 
         renderbutton.on("click", function() {
-            startRendering();
+            var imageId = $("#imageId")[0].value;
+            startRendering(imageId);
         });
+
+        rendermultiplebutton.on("click", function() {
+            render_multiple_dialog.open(startRenderingMultiple);
+	});
 
         cancelbutton.on("click", function() {
             cancelled = true;

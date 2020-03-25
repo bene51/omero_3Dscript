@@ -22,6 +22,17 @@ def getName(request, conn=None, **kwargs):
      return JsonResponse({'name': image_name})
 
 @login_required()
+def getImageDatasets(request, conn=None, **kwargs):
+     image_id = request.GET['image']
+     image = conn.getObject("Image", image_id)
+     if image is None:
+          return JsonResponse({'error': "Image " + image_id + " cannot be accessed"})
+     names = []
+     for dataset in image.listParents():
+         names.append({'id': dataset.getId(), 'name': dataset.getName()})
+     return JsonResponse({'datasets': names})
+
+@login_required()
 def index(request, conn=None, **kwargs):
      """ Shows a subset of Z-planes for an image """
      image_id = request.GET.get('image', -1)
