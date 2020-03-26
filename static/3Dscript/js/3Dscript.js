@@ -1,7 +1,27 @@
+var Model3Dscript = Backbone.Model.extend({
+    defaults: function() {
+        return {
+	    'outputWidth': 600,
+	    'outputHeight': 450,
+	}
+    },
+
+    setOutputSize: function(outputWidth, outputHeight) {
+        this.set({'outputWidth': outputWidth, 'outputHeight': outputHeight});
+    },
+});
+
+
+
 (function() {
+    var model = new Model3Dscript();
+    var settingsView = new SettingsView({model: model});
+    // var imageView = new ImageView({model: model});
+
     var accordion;
     var renderbutton = $("#render-button");
     var cancelbutton = $("#cancel-button");
+    var settingsbutton = $("#settings");
     var basename;
     var cancelled = false;
 
@@ -29,13 +49,13 @@
         cancelled = false;
         enableRenderingButton(false);
         $("#backtrace")[0].innerHTML = "";
-	setStateAndProgress("Starting", 2);
+        setStateAndProgress("Starting", 2);
         accordion.accordion("refresh");
         accordion.accordion("option", "active", false);
         var imageId = $("#imageId")[0].value;
         var script = $("#script")[0].value;
-        var targetWidth = $("#tgtWidth")[0].value;
-        var targetHeight = $("#tgtHeight")[0].value;
+        var targetWidth = model.get('outputWidth');
+        var targetHeight = model.get('outputHeight');
         $.ajax({
             url: '/omero_3dscript/startRendering',
             data: {
@@ -188,6 +208,10 @@
         });
     
         onresize();
+
+        settingsbutton.on("click", function() {
+            settingsView.showDialog();
+        });
 
         renderbutton.on("click", function() {
             startRendering();
