@@ -27,7 +27,7 @@ var SettingsView = Backbone.View.extend({
             buttons: {
                 "OK": function() {
                     self.verify();
-		},
+                },
                 Cancel: function() {
                     self.form[0].reset();
                     self.dialog.dialog("close");
@@ -114,10 +114,11 @@ var SettingsView = Backbone.View.extend({
         valid = valid && this.checkInteger(this.tgtWidth, "Output width", 50);
         valid = valid && this.checkInteger(this.tgtHeight, "Output height", 50);
 
-        this.model.setOutputSize(this.tgtWidth.val(), this.tgtHeight.val());
 
-        if(valid)
+        if(valid) {
+            this.model.setOutputSize(this.tgtWidth.val(), this.tgtHeight.val());
             this.dialog.dialog("close");
+        }
 
         return valid;
     },
