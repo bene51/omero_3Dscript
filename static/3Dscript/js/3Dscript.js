@@ -9,6 +9,7 @@ var Model3Dscript = Backbone.Model.extend({
             'resultURL': '',
             'state': '',
             'progress': 0,
+            'position': 0,
             'stacktrace': '',
         }
     },
@@ -25,11 +26,14 @@ var Model3Dscript = Backbone.Model.extend({
         this.set({'resultType': resultType, 'resultURL': resultURL});
     },
 
-    setStateAndProgress: function(state, progress, stacktrace) {
-        this.set({'state': state, 'progress': progress});
-        console.debug
-        if(stacktrace)
-            this.set({'stacktrace': stacktrace});
+    setStateAndProgress: function(state, progress, stacktrace, position) {
+        this.set('state', state);
+        if(progress >= 0)
+            this.set('progress', progress);
+        if(stacktrace != null)
+            this.set('stacktrace', stacktrace);
+        if(position >= 0)
+            this.set('position', position);
     },
 });
 
@@ -118,6 +122,7 @@ var ResultView = Backbone.View.extend({
     var imageView = new ImageView({model: model});
     var resultView = new ResultView({model: model});
     var progressView = new ProgressView({model: model});
+    var queueView = new QueueView({model: model});
 
     var renderbutton = $("#render-button");
     var cancelbutton = $("#cancel-button");
@@ -136,7 +141,7 @@ var ResultView = Backbone.View.extend({
             dataType: 'json',
             success: function(data) {
                 console.debug("cancelled");
-                model.setStateAndProgress("Cancelled", -1);
+                model.setStateAndProgress("Cancelled", -1, null, -1);
                 enableRenderingButton(true);
                 enableCancelButton(true);
             },
@@ -149,7 +154,7 @@ var ResultView = Backbone.View.extend({
     function startRendering() {
         cancelled = false;
         enableRenderingButton(false);
-        model.setStateAndProgress("Starting", 2);
+        model.setStateAndProgress("Starting", 2, null, -1);
         var imageId = $("#imageId")[0].value;
         var script = $("#script")[0].value;
         var targetWidth = model.get('outputWidth');
@@ -166,7 +171,7 @@ var ResultView = Backbone.View.extend({
             success: function(data) {
                 if(data.error) {
                     console.debug("error startRendering");
-                    model.setStateAndProgress('ERROR: ' + data.error.trim(), -1, data.stacktrace);
+                    model.setStateAndProgress('ERROR: ' + data.error.trim(), -1, data.stacktrace, -1);
                     enableRenderingButton(true);
                 }
                 else {
@@ -201,9 +206,13 @@ var ResultView = Backbone.View.extend({
                 },
                 dataType: 'json',
                 success: function(data) {
+                    // get the position in the queue:
+                    // 0 means it's currently processed,
+                    // 1 means it's the first in the queue (after the currently processed)
+                    // etc.
                     position = data.position; // TODO show the position visually on the frontend
                     if(data.state.startsWith('ERROR')) {
-                        model.setStateAndProgress('ERROR', 100 * data.progress, data.stacktrace);
+                        model.setStateAndProgress('ERROR', 100 * data.progress, data.stacktrace, -1);
                         enableRenderingButton(true);
                     }
                     else if (data.state.startsWith('FINISHED')) {
@@ -211,13 +220,11 @@ var ResultView = Backbone.View.extend({
                         enableRenderingButton(true);
                     }
                     else if (data.state.startsWith('QUEUED')) {
-                        model.setStateAndProgress(data.state, 100 * data.progress);
-                        QueueDialog.setPosition(position - 1);
+                        model.setStateAndProgress(data.state, 100 * data.progress, null, position);
                         updateState(basename);
                     }
                     else {
-                        QueueDialog.close();
-                        model.setStateAndProgress(data.state, 100 * data.progress);
+                        model.setStateAndProgress(data.state, 100 * data.progress, null, position);
                         updateState(basename);
                     }
                 },
@@ -229,7 +236,7 @@ var ResultView = Backbone.View.extend({
     }
 
     function createAnnotation(basename) {
-        model.setStateAndProgress('CREATE ATTACHMENT', 95);
+        model.setStateAndProgress('CREATE ATTACHMENT', 95, null, 0);
         $.ajax({
             url: '/omero_3dscript/createAnnotation',
             data: {
@@ -239,7 +246,7 @@ var ResultView = Backbone.View.extend({
             dataType: 'json',
             success: function(data) {
                 if(data.error) {
-                    model.setStateAndProgress('ERROR: ' + data.error.trim(), -1);
+                    model.setStateAndProgress('ERROR: ' + data.error.trim(), -1, null, -1);
                     enableRenderingButton(true);
                 }
                 else {
@@ -247,7 +254,7 @@ var ResultView = Backbone.View.extend({
                     var type = data.isVideo ? 'video' : 'image';
                     var url = "/webclient/annotation/" + annotationId;
                     model.setResult(type, url);
-                    model.setStateAndProgress('FINISHED', 100);
+                    model.setStateAndProgress('FINISHED', 100, null, -1);
                 }
             }
         });
