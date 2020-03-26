@@ -1,9 +1,15 @@
 var Model3Dscript = Backbone.Model.extend({
     defaults: function() {
         return {
-	    'outputWidth': 600,
-	    'outputHeight': 450,
-	}
+            'outputWidth': 600,
+            'outputHeight': 450,
+            'imageId': -1,
+            'imageName': '',
+        }
+    },
+
+    setImage: function(imageId, imageName) {
+        this.set({'imageId': imageId, 'imageName': imageName});
     },
 
     setOutputSize: function(outputWidth, outputHeight) {
@@ -11,17 +17,16 @@ var Model3Dscript = Backbone.Model.extend({
     },
 });
 
-
-
 (function() {
     var model = new Model3Dscript();
     var settingsView = new SettingsView({model: model});
-    // var imageView = new ImageView({model: model});
+    var imageView = new ImageView({model: model});
 
     var accordion;
     var renderbutton = $("#render-button");
     var cancelbutton = $("#cancel-button");
     var settingsbutton = $("#settings");
+    var imagebutton = $("#imagebutton");
     var basename;
     var cancelled = false;
 
@@ -213,6 +218,10 @@ var Model3Dscript = Backbone.Model.extend({
             settingsView.showDialog();
         });
 
+        imagebutton.on("click", function() {
+            imageView.showDialog();
+        });
+
         renderbutton.on("click", function() {
             startRendering();
         });
@@ -220,6 +229,11 @@ var Model3Dscript = Backbone.Model.extend({
         cancelbutton.on("click", function() {
             cancelled = true;
         });
+
+        if($("#imageId").val() < 0) {
+            $("#imageId").val('');
+            imageView.showDialog();
+        }
 
         $("#script").bind("keydown", function(event) {
             console.debug("*" + $(this).data("ui-autocomplete").menu.visible);
