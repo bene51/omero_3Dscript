@@ -5,6 +5,8 @@ var Model3Dscript = Backbone.Model.extend({
             'outputHeight': 450,
             'imageId': -1,
             'imageName': '',
+            'resultType': 'image', // either 'image' or 'video'
+            'resultURL': '',
         }
     },
 
@@ -15,12 +17,49 @@ var Model3Dscript = Backbone.Model.extend({
     setOutputSize: function(outputWidth, outputHeight) {
         this.set({'outputWidth': outputWidth, 'outputHeight': outputHeight});
     },
+
+    setResult: function(resultType, resultURL) {
+        this.set({'resultType': resultType, 'resultURL': resultURL});
+    },
+});
+
+var ResultView = Backbone.View.extend({
+    el: $("#videoContainer"),
+
+    initialize: function() {
+        this.model.on('change:resultType change:resultURL', this.render, this);
+    },
+
+    render: function() {
+        var type = this.model.get('resultType');
+        var url = this.model.get('resultURL');
+        console.debug(this.el);
+        if(type == 'video') {
+            var src = $("<source>").attr({
+                'src': url,
+                'type': 'video/mp4'});
+            var video = $("<video></video>")
+                .attr("controls", true)
+                .addClass("preview")
+                .append(src);
+            this.$el.empty().append(video);
+        }
+        else {
+            var img = $("<img>")
+                .attr({'src': url, 'type': 'image/png'})
+                .addClass("preview");
+            this.$el.empty().append(img);
+        }
+
+        return this;
+    },
 });
 
 (function() {
     var model = new Model3Dscript();
     var settingsView = new SettingsView({model: model});
     var imageView = new ImageView({model: model});
+    var resultView = new ResultView({model: model});
 
     var accordion;
     var renderbutton = $("#render-button");
@@ -178,18 +217,9 @@ var Model3Dscript = Backbone.Model.extend({
                 }
                 else {
                     var annotationId = data.annotationId;
-                    if(data.isVideo) {
-                        $('#videoContainer')[0].innerHTML = `
-    <video class="preview"  controls>
-      <source src="/webclient/annotation/${annotationId}" type="video/mp4">
-      Your browser doesn't support this video.
-    </video>`.trim();
-                    }
-                    else {
-                        $('#videoContainer')[0].innerHTML = `
-    <img class="preview" src="/webclient/annotation/${annotationId}" type="image/png">
-    </img>`.trim();
-                    }
+                    var type = data.isVideo ? 'video' : 'image';
+                    var url = "/webclient/annotation/" + annotationId;
+                    model.setResult(type, url);
                     setStateAndProgress('FINISHED', 100);
                 }
             }
