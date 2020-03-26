@@ -7,6 +7,9 @@ var Model3Dscript = Backbone.Model.extend({
             'imageName': '',
             'resultType': 'image', // either 'image' or 'video'
             'resultURL': '',
+            'state': '',
+            'progress': 0,
+            'stacktrace': '',
         }
     },
 
@@ -20,6 +23,60 @@ var Model3Dscript = Backbone.Model.extend({
 
     setResult: function(resultType, resultURL) {
         this.set({'resultType': resultType, 'resultURL': resultURL});
+    },
+
+    setStateAndProgress: function(state, progress, stacktrace) {
+        this.set({'state': state, 'progress': progress});
+        console.debug
+        if(stacktrace)
+            this.set({'stacktrace': stacktrace});
+    },
+});
+
+var ProgressView = Backbone.View.extend({
+    el: $("#accordion"),
+
+    initialize: function() {
+        this.model.on('change:state change:progress change:stacktrace', this.render, this);
+        this.$el.accordion({
+            collapsible: true,
+            active: false,
+            animate: 200,
+        });
+    },
+
+    render: function() {
+        var state = this.model.get('state');
+        var progress = this.model.get('progress');
+        var stacktrace = this.model.get('stacktrace');
+        console.debug("ProgressView.render(" + state + ", " + progress + ", " + stacktrace + ")");
+        var pbar = $('#bar');
+        var label = $('#barlabel');
+        if(progress >= 0)
+            pbar.stop().animate({"width": progress + '%'}, 100);
+        if(state) {
+            label[0].innerHTML = state;
+            if(state.startsWith('ERROR')) {
+                pbar.css({"background-color":"red"});
+                label.css({"color":"black"});
+                if(stacktrace != null && stacktrace != '') {
+                    // $("#backtrace")[0].innerHTML = "<pre>" + stacktrace + "</pre>";
+                    $("#backtrace").empty().append($("<pre></pre>").text(stacktrace));
+                    console.debug($("#backtrace"));
+                }
+                else
+                    $("#backtrace").append($("<pre></pre>").text(""));
+                this.$el.accordion("option", "active", 0);
+                this.$el.accordion("refresh");
+            }
+            else {
+                pbar.css({"background-color":"#4caf50"});
+                label.css({"color":"white"});
+                $("#backtrace").append($("<pre></pre>").text(""));
+                this.$el.accordion("option", "active", false);
+                this.$el.accordion("refresh");
+            }
+        }
     },
 });
 
@@ -60,8 +117,8 @@ var ResultView = Backbone.View.extend({
     var settingsView = new SettingsView({model: model});
     var imageView = new ImageView({model: model});
     var resultView = new ResultView({model: model});
+    var progressView = new ProgressView({model: model});
 
-    var accordion;
     var renderbutton = $("#render-button");
     var cancelbutton = $("#cancel-button");
     var settingsbutton = $("#settings");
@@ -79,7 +136,7 @@ var ResultView = Backbone.View.extend({
             dataType: 'json',
             success: function(data) {
                 console.debug("cancelled");
-                setStateAndProgress("Cancelled", -1);
+                model.setStateAndProgress("Cancelled", -1);
                 enableRenderingButton(true);
                 enableCancelButton(true);
             },
@@ -92,10 +149,7 @@ var ResultView = Backbone.View.extend({
     function startRendering() {
         cancelled = false;
         enableRenderingButton(false);
-        $("#backtrace")[0].innerHTML = "";
-        setStateAndProgress("Starting", 2);
-        accordion.accordion("refresh");
-        accordion.accordion("option", "active", false);
+        model.setStateAndProgress("Starting", 2);
         var imageId = $("#imageId")[0].value;
         var script = $("#script")[0].value;
         var targetWidth = model.get('outputWidth');
@@ -112,12 +166,11 @@ var ResultView = Backbone.View.extend({
             success: function(data) {
                 if(data.error) {
                     console.debug("error startRendering");
-                    setStateAndProgress('ERROR: ' + data.error.trim(), -1, data.stacktrace);
+                    model.setStateAndProgress('ERROR: ' + data.error.trim(), -1, data.stacktrace);
                     enableRenderingButton(true);
                 }
                 else {
                     basename = data.basename;
-                    $('#bar').width(1 + '%');
                     updateState(basename);
                 }
             },
@@ -125,32 +178,6 @@ var ResultView = Backbone.View.extend({
                 console.debug("error in startRendering " + thrownError);
             }
         });
-    }
-
-    function setStateAndProgress(state, progress, stacktrace=null) {
-        var pbar = $('#bar');
-        var label = $('#barlabel');
-        if(progress >= 0)
-            // pbar.width(progress + '%');
-            pbar.stop().animate({"width": progress + '%'}, 100); // .queue(function(){});
-        if(state != null) {
-            label[0].innerHTML = state;
-            if(state.startsWith('ERROR')) {
-                pbar.css({"background-color":"red"});
-                label.css({"color":"black"});
-                if(stacktrace)
-                    $("#backtrace")[0].innerHTML = "<pre>" + stacktrace + "</pre>";
-                accordion.accordion("refresh");
-                accordion.accordion("option", "active", 0);
-            }
-            else {
-                pbar.css({"background-color":"#4caf50"});
-                label.css({"color":"white"});
-                $("#backtrace")[0].innerHTML = "";
-                accordion.accordion("refresh");
-                accordion.accordion("option", "active", false);
-            }
-        }
     }
 
     function enableRenderingButton(state) {
@@ -176,7 +203,7 @@ var ResultView = Backbone.View.extend({
                 success: function(data) {
                     position = data.position; // TODO show the position visually on the frontend
                     if(data.state.startsWith('ERROR')) {
-                        setStateAndProgress('ERROR', 100 * data.progress, data.stacktrace);
+                        model.setStateAndProgress('ERROR', 100 * data.progress, data.stacktrace);
                         enableRenderingButton(true);
                     }
                     else if (data.state.startsWith('FINISHED')) {
@@ -184,13 +211,13 @@ var ResultView = Backbone.View.extend({
                         enableRenderingButton(true);
                     }
                     else if (data.state.startsWith('QUEUED')) {
-                        setStateAndProgress(data.state, 100 * data.progress);
+                        model.setStateAndProgress(data.state, 100 * data.progress);
                         QueueDialog.setPosition(position - 1);
                         updateState(basename);
                     }
                     else {
                         QueueDialog.close();
-                        setStateAndProgress(data.state, 100 * data.progress);
+                        model.setStateAndProgress(data.state, 100 * data.progress);
                         updateState(basename);
                     }
                 },
@@ -202,7 +229,7 @@ var ResultView = Backbone.View.extend({
     }
 
     function createAnnotation(basename) {
-        setStateAndProgress('CREATE ATTACHMENT', 95);
+        model.setStateAndProgress('CREATE ATTACHMENT', 95);
         $.ajax({
             url: '/omero_3dscript/createAnnotation',
             data: {
@@ -212,7 +239,7 @@ var ResultView = Backbone.View.extend({
             dataType: 'json',
             success: function(data) {
                 if(data.error) {
-                    setStateAndProgress('ERROR: ' + data.error.trim(), -1);
+                    model.setStateAndProgress('ERROR: ' + data.error.trim(), -1);
                     enableRenderingButton(true);
                 }
                 else {
@@ -220,7 +247,7 @@ var ResultView = Backbone.View.extend({
                     var type = data.isVideo ? 'video' : 'image';
                     var url = "/webclient/annotation/" + annotationId;
                     model.setResult(type, url);
-                    setStateAndProgress('FINISHED', 100);
+                    model.setStateAndProgress('FINISHED', 100);
                 }
             }
         });
@@ -232,11 +259,6 @@ var ResultView = Backbone.View.extend({
     }
 
     function main() {
-        accordion = $("#accordion").accordion({
-            collapsible: true,
-            active: false,
-            animate: 200,
-        });
     
         $(window).resize(function() {
             onresize();
@@ -307,11 +329,11 @@ var ResultView = Backbone.View.extend({
                 console.debug("autocompletion: source()");
                 var caret = $("#script")[0].selectionStart;
                 var text = $("#script").val();
-		var data = getCompletions(text, caret);
+                var data = getCompletions(text, caret);
                 var len = data.alreadyEnteredLength;
                 var op = data.options;
-		$("#script")[0].alreadyEnteredLength = len;
-		response(data.options);
+                $("#script")[0].alreadyEnteredLength = len;
+                response(data.options);
             },
             minLength: 0,
             autoFocus: true,
