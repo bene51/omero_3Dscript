@@ -35,6 +35,24 @@ var Model3Dscript = Backbone.Model.extend({
         if(position >= 0)
             this.set('position', position);
     },
+
+    cancelRendering: function(basename) {
+        var that = this;
+        $.ajax({
+            url: '/omero_3dscript/cancelRendering',
+            data: {
+                basename: basename
+            },
+            dataType: 'json',
+            success: function(data) {
+                console.debug("cancelled");
+                that.setStateAndProgress("CANCELLED", -1, null, -1);
+            },
+            error: function(xhr, ajaxOptions, thrownError) {
+                console.debug("error in updateState " + thrownError);
+            }
+        });
+    }
 });
 
 var AppView = Backbone.View.extend({
@@ -155,23 +173,6 @@ var ResultView = Backbone.View.extend({
     var basename;
     var cancelled = false;
 
-    function cancelRendering() {
-        $.ajax({
-            url: '/omero_3dscript/cancelRendering',
-            data: {
-                basename: basename
-            },
-            dataType: 'json',
-            success: function(data) {
-                console.debug("cancelled");
-                model.setStateAndProgress("CANCELLED", -1, null, -1);
-            },
-            error: function(xhr, ajaxOptions, thrownError) {
-                console.debug("error in updateState " + thrownError);
-            }
-        });
-    }
-
     function startRendering() {
         cancelled = false;
         model.setStateAndProgress("STARTING", 2, null, -1);
@@ -207,7 +208,7 @@ var ResultView = Backbone.View.extend({
     function updateState(basename) {
         setTimeout(function myTimer() {
             if(cancelled) {
-                cancelRendering();
+                model.cancelRendering(basename);
                 return;
             }
             $.ajax({
