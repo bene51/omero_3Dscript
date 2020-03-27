@@ -39,6 +39,39 @@ var Model3Dscript = Backbone.Model.extend({
             this.set('position', position);
     },
 
+    startRendering: function(imageId, script) {
+        var that = this;
+        this.cancelled = false;
+        this.setStateAndProgress("STARTING", 2, null, -1);
+        var targetWidth = this.get('outputWidth');
+        var targetHeight = this.get('outputHeight');
+        $.ajax({
+            url: '/omero_3dscript/startRendering',
+            data: {
+                imageId: imageId,
+                script: script,
+                targetWidth: targetWidth,
+                targetHeight: targetHeight,
+            },
+            dataType: 'json',
+            success: function(data) {
+                if(data.error) {
+                    console.debug("error startRendering");
+                    var err = data.error.trim();
+                    var st = data.stacktrace;
+                    that.setStateAndProgress('ERROR: ' + err, -1, st, -1);
+                }
+                else {
+                    var basename = data.basename;
+                    that.updateState(basename);
+                }
+            },
+            error: function(xhr, ajaxOptions, thrownError) {
+                console.debug("error in startRendering " + thrownError);
+            }
+        });
+    },
+
     updateState: function(basename) {
         var that = this;
         setTimeout(function myTimer() {
@@ -247,39 +280,7 @@ var ResultView = Backbone.View.extend({
     var cancelbutton = $("#cancel-button");
     var settingsbutton = $("#settings");
     var imagebutton = $("#imagebutton");
-    var basename;
 
-    function startRendering() {
-        model.cancelled = false;
-        model.setStateAndProgress("STARTING", 2, null, -1);
-        var imageId = $("#imageId")[0].value;
-        var script = $("#script")[0].value;
-        var targetWidth = model.get('outputWidth');
-        var targetHeight = model.get('outputHeight');
-        $.ajax({
-            url: '/omero_3dscript/startRendering',
-            data: {
-                imageId: imageId,
-                script: script,
-                targetWidth: targetWidth,
-                targetHeight: targetHeight,
-            },
-            dataType: 'json',
-            success: function(data) {
-                if(data.error) {
-                    console.debug("error startRendering");
-                    model.setStateAndProgress('ERROR: ' + data.error.trim(), -1, data.stacktrace, -1);
-                }
-                else {
-                    basename = data.basename;
-                    model.updateState(basename);
-                }
-            },
-            error: function(xhr, ajaxOptions, thrownError) {
-                console.debug("error in startRendering " + thrownError);
-            }
-        });
-    }
 
     function onresize() {
         var left = ($(window).width() - 600) / 2.0;
@@ -303,7 +304,9 @@ var ResultView = Backbone.View.extend({
         });
 
         renderbutton.on("click", function() {
-            startRendering();
+            var imageId = $("#imageId").val();
+            var script = $("#script").val();
+            model.startRendering(imageId, script);
         });
 
         cancelbutton.on("click", function() {
