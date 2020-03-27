@@ -52,7 +52,36 @@ var Model3Dscript = Backbone.Model.extend({
                 console.debug("error in updateState " + thrownError);
             }
         });
-    }
+    },
+
+    createAnnotation: function(basename, imageId) {
+        this.setStateAndProgress('CREATE ATTACHMENT', 95, null, 0);
+        var that = this;
+        $.ajax({
+            url: '/omero_3dscript/createAnnotation',
+            data: {
+                basename: basename,
+                imageId: imageId
+            },
+            dataType: 'json',
+            success: function(data) {
+                if(data.error) {
+                    var err = data.error.trim();
+                    var st = data.stacktrace();
+                    that.setStateAndProgress('ERROR: ' + err, -1, st, -1);
+                }
+                else {
+                    var type = data.isVideo ? 'video' : 'image';
+                    var url = "/webclient/annotation/" + data.annotationId + "/";
+                    that.setResult(type, url);
+                    that.setStateAndProgress('FINISHED', 100, null, -1);
+                }
+            },
+            error: function(xhr, ajaxOptions, thrownError) {
+                console.debug("error in createAnnotation " + thrownError);
+            },
+        });
+    },
 });
 
 var AppView = Backbone.View.extend({
@@ -227,7 +256,7 @@ var ResultView = Backbone.View.extend({
                         model.setStateAndProgress('ERROR', 100 * data.progress, data.stacktrace, -1);
                     }
                     else if (data.state.startsWith('FINISHED')) {
-                        createAnnotation(basename);
+                        model.createAnnotation(basename, $("#imageId").val());
                     }
                     else if (data.state.startsWith('QUEUED')) {
                         model.setStateAndProgress(data.state, 100 * data.progress, null, position);
@@ -243,29 +272,6 @@ var ResultView = Backbone.View.extend({
                 }
             });
         }, 500);
-    }
-
-    function createAnnotation(basename) {
-        model.setStateAndProgress('CREATE ATTACHMENT', 95, null, 0);
-        $.ajax({
-            url: '/omero_3dscript/createAnnotation',
-            data: {
-                basename: basename,
-                imageId: $("#imageId")[0].value
-            },
-            dataType: 'json',
-            success: function(data) {
-                if(data.error) {
-                    model.setStateAndProgress('ERROR: ' + data.error.trim(), -1, null, -1);
-                }
-                else {
-                    var type = data.isVideo ? 'video' : 'image';
-                    var url = "/webclient/annotation/" + data.annotationId + "/";
-                    model.setResult(type, url);
-                    model.setStateAndProgress('FINISHED', 100, null, -1);
-                }
-            }
-        });
     }
 
     function onresize() {
