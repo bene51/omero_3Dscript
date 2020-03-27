@@ -168,8 +168,23 @@ var Model3Dscript = Backbone.Model.extend({
 var AppView = Backbone.View.extend({
     el: $("#content"),
 
+    events: {
+        "click #render-button": "handleRenderButton",
+        "click #cancel-button": "handleCancelButton",
+    },
+
     initialize: function() {
         this.model.on('change:state', this.render, this);
+    },
+
+    handleRenderButton: function(event) {
+        var imageId = $("#imageId").val();
+        var script = $("#script").val();
+        this.model.startRendering(imageId, script);
+    },
+
+    handleCancelButton: function(event) {
+        this.model.cancelled = true;
     },
 
     render: function() {
@@ -271,13 +286,11 @@ var ResultView = Backbone.View.extend({
     var model = new Model3Dscript();
     var settingsView = new SettingsView({model: model});
     var imageView = new ImageView({model: model});
-    var resultView = new ResultView({model: model});
-    var progressView = new ProgressView({model: model});
-    var queueView = new QueueView({model: model});
-    var appView = new AppView({model: model});
+    new ResultView({model: model});
+    new ProgressView({model: model});
+    new QueueView({model: model});
+    new AppView({model: model});
 
-    var renderbutton = $("#render-button");
-    var cancelbutton = $("#cancel-button");
     var settingsbutton = $("#settings");
     var imagebutton = $("#imagebutton");
 
@@ -301,16 +314,6 @@ var ResultView = Backbone.View.extend({
 
         imagebutton.on("click", function() {
             imageView.showDialog();
-        });
-
-        renderbutton.on("click", function() {
-            var imageId = $("#imageId").val();
-            var script = $("#script").val();
-            model.startRendering(imageId, script);
-        });
-
-        cancelbutton.on("click", function() {
-            model.cancelled = true;
         });
 
         if($("#imageId").val() < 0) {
