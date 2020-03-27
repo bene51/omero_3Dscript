@@ -1,4 +1,7 @@
 var Model3Dscript = Backbone.Model.extend({
+
+    cancelled: false,
+
     defaults: function() {
         return {
             'outputWidth': 600,
@@ -34,6 +37,51 @@ var Model3Dscript = Backbone.Model.extend({
             this.set('stacktrace', stacktrace);
         if(position >= 0)
             this.set('position', position);
+    },
+
+    updateState: function(basename) {
+        var that = this;
+        setTimeout(function myTimer() {
+            if(that.cancelled) {
+                that.cancelRendering(basename);
+                return;
+            }
+            $.ajax({
+                url: '/omero_3dscript/getStateAndProgress',
+                data: {
+                    basename: basename
+                },
+                dataType: 'json',
+                success: function(data) {
+                    // get the position in the queue:
+                    // 0 means it's currently processed,
+                    // 1 means it's the first in the queue (after the currently processed)
+                    // etc.
+                    var pos = data.position;
+                    var progress = 100 * data.progress;
+                    var state = data.state;
+
+                    if(state.startsWith('ERROR')) {
+                        var st = data.stacktrace;
+                        that.setStateAndProgress('ERROR', progress, st, -1);
+                    }
+                    else if (state.startsWith('FINISHED')) {
+                        that.createAnnotation(basename, $("#imageId").val());
+                    }
+                    else if (state.startsWith('QUEUED')) {
+                        that.setStateAndProgress(state, progress, null, pos);
+                        that.updateState(basename);
+                    }
+                    else {
+                        that.setStateAndProgress(state, progress, null, pos);
+                        that.updateState(basename);
+                    }
+                },
+                error: function(xhr, ajaxOptions, thrownError) {
+                    console.debug("error in updateState " + thrownError);
+                }
+            });
+        }, 500);
     },
 
     cancelRendering: function(basename) {
@@ -200,10 +248,9 @@ var ResultView = Backbone.View.extend({
     var settingsbutton = $("#settings");
     var imagebutton = $("#imagebutton");
     var basename;
-    var cancelled = false;
 
     function startRendering() {
-        cancelled = false;
+        model.cancelled = false;
         model.setStateAndProgress("STARTING", 2, null, -1);
         var imageId = $("#imageId")[0].value;
         var script = $("#script")[0].value;
@@ -225,53 +272,13 @@ var ResultView = Backbone.View.extend({
                 }
                 else {
                     basename = data.basename;
-                    updateState(basename);
+                    model.updateState(basename);
                 }
             },
             error: function(xhr, ajaxOptions, thrownError) {
                 console.debug("error in startRendering " + thrownError);
             }
         });
-    }
-
-    function updateState(basename) {
-        setTimeout(function myTimer() {
-            if(cancelled) {
-                model.cancelRendering(basename);
-                return;
-            }
-            $.ajax({
-                url: '/omero_3dscript/getStateAndProgress',
-                data: {
-                    basename: basename
-                },
-                dataType: 'json',
-                success: function(data) {
-                    // get the position in the queue:
-                    // 0 means it's currently processed,
-                    // 1 means it's the first in the queue (after the currently processed)
-                    // etc.
-                    var position = data.position; // TODO show the position visually on the frontend
-                    if(data.state.startsWith('ERROR')) {
-                        model.setStateAndProgress('ERROR', 100 * data.progress, data.stacktrace, -1);
-                    }
-                    else if (data.state.startsWith('FINISHED')) {
-                        model.createAnnotation(basename, $("#imageId").val());
-                    }
-                    else if (data.state.startsWith('QUEUED')) {
-                        model.setStateAndProgress(data.state, 100 * data.progress, null, position);
-                        updateState(basename);
-                    }
-                    else {
-                        model.setStateAndProgress(data.state, 100 * data.progress, null, position);
-                        updateState(basename);
-                    }
-                },
-                error: function(xhr, ajaxOptions, thrownError) {
-                    console.debug("error in updateState " + thrownError);
-                }
-            });
-        }, 500);
     }
 
     function onresize() {
@@ -300,7 +307,7 @@ var ResultView = Backbone.View.extend({
         });
 
         cancelbutton.on("click", function() {
-            cancelled = true;
+            model.cancelled = true;
         });
 
         if($("#imageId").val() < 0) {
