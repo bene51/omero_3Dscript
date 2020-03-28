@@ -99,7 +99,7 @@ var Model3Dscript = Backbone.Model.extend({
                         that.setStateAndProgress('ERROR', progress, st, -1);
                     }
                     else if (state.startsWith('FINISHED')) {
-                        that.createAnnotation(basename, $("#imageId").val());
+                        that.createAnnotation(basename, that.get('imageId'));
                     }
                     else if (state.startsWith('QUEUED')) {
                         that.setStateAndProgress(state, progress, null, pos);
