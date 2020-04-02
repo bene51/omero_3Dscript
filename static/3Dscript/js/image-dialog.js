@@ -124,35 +124,30 @@ var ImageView = Backbone.View.extend({
 
         var valid = true;
 
-        // for(var i = 0; i < numbers.length; i++) {
-            $.ajax({
-                url: '/omero_3dscript/getName',
-                data: {
-                  image: numbers
-                },
-                async: false,
-                dataType: 'json',
-                success: function(data) {
-                  if(data.error) {
-                    console.debug("error in verify: " + data.error);
-                    self.updateTips(data.error);
-                    valid = false;
-                  }
-                  else {
-                    console.debug("success in verify");
-                    names = data.name;
-                    console.debug(names);
-                  }
-                },
-                error: function(xhr, ajaxOptions, thrownError) {
-                  console.debug("error in startRendering " + thrownError);
-                  self.updateTips(thrownError);
-                  valid = false;
-                }
-            });
-        //    if(!valid)
-        //        break;
-        // }
+        $.ajax({
+            url: '/omero_3dscript/getName',
+            data: {
+              image: numbers
+            },
+            async: false,
+            dataType: 'json',
+            success: function(data) {
+              if(data.error) {
+                self.updateTips(data.error);
+                valid = false;
+              }
+              else {
+                console.debug("success in verify");
+                names = data.name;
+                console.debug(names);
+              }
+            },
+            error: function(xhr, ajaxOptions, thrownError) {
+              console.debug("error in startRendering " + thrownError);
+              self.updateTips(thrownError);
+              valid = false;
+            }
+        });
 
         if(valid) {
             this.model.setImages(numbers, names);
