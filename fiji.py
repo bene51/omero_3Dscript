@@ -90,6 +90,14 @@ def getStateAndProgress(basename):
 	state = toks[2]
 	return state, progress, position
 
+def getTypeAndAttachmentId(basename):
+	typeAndAttachmentId = send('attachmentid ' + basename + '\n')
+	logger.info("getTypeAndAttachmentId: " + typeAndAttachmentId)
+	toks = typeAndAttachmentId.split()
+	outputtype = toks[0]
+	annotationId = int(toks[1])
+	return outputtype, annotationId
+
 def cancelRendering(basename):
 	send('cancel ' + basename + '\n')
 
