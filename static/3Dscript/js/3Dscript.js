@@ -1,28 +1,21 @@
-var Model3Dscript = Backbone.Model.extend({
-
-    cancelled: false,
-
+var ModelJob = Backbone.Model.extend({
     defaults: function() {
         return {
-            'outputWidth': 600,
-            'outputHeight': 450,
             'imageId': -1,
             'imageName': '',
-            'resultType': 'image', // either 'image' or 'video'
+            'basename': '',
+            'resultType': 'none', // either 'image' or 'video'
             'resultURL': '',
             'state': 'READY',
             'progress': 0,
             'position': 0,
             'stacktrace': '',
+            'nextToRender': false,
         }
     },
 
-    setImage: function(imageId, imageName) {
-        this.set({'imageId': imageId, 'imageName': imageName});
-    },
-
-    setOutputSize: function(outputWidth, outputHeight) {
-        this.set({'outputWidth': outputWidth, 'outputHeight': outputHeight});
+    resetResult: function() {
+        this.set({'resultType': 'none', 'resultURL': ''});
     },
 
     setResult: function(resultType, resultURL) {
@@ -38,17 +31,93 @@ var Model3Dscript = Backbone.Model.extend({
         if(position >= 0)
             this.set('position', position);
     },
+});
 
-    startRendering: function(imageId, script) {
+var JobList = Backbone.Collection.extend({
+    model: ModelJob,
+});
+
+var Model3Dscript = Backbone.Model.extend({
+
+    cancelled: false,
+
+    defaults: function() {
+        return {
+            'outputWidth': 600,
+            'outputHeight': 450,
+            'nextToRender': -1,
+            'processing': false,
+        }
+    },
+
+    initialize: function() {
+        this.jobs = new JobList();
+        this.jobs.add(new ModelJob());
+        this.setNextToRender(0);
+    },
+
+    resetResults: function() {
+        this.jobs.each(function(job) { job.resetResult });
+    },
+
+    setNextToRender: function(index) {
+        var before = this.get('nextToRender');
+        if(before == index)
+            return;
+        this.set('nextToRender', index);
+        if(before >= 0)
+            this.getJob(before).set('nextToRender', false);
+        if(index >= 0)
+            this.getJob(index).set('nextToRender', true);
+    },
+
+    setImages: function(imageIds, imageNames) {
+        var newJobs = [];
+        for(var i = 0; i < imageIds.length; i++) {
+            newJobs.push(new ModelJob({
+                'imageId': imageIds[i],
+                'imageName': imageNames[i],
+            }));
+        }
+        this.jobs.reset(newJobs);
+        this.setNextToRender(-1);
+        this.setNextToRender(0);
+    },
+
+    setOutputSize: function(outputWidth, outputHeight) {
+        this.set({'outputWidth': outputWidth, 'outputHeight': outputHeight});
+    },
+
+    getCurrentJob: function() {
+        var idx = this.get('nextToRender');
+        if(idx < 0 || idx >= this.jobs.length)
+            return null;
+        return this.jobs.at(idx);
+    },
+
+    getJob: function(index) {
+        return this.jobs.at(index);
+    },
+
+    startRendering: function(script) {
+        if(this.jobs.length == 0) {
+            // TODO show some message/warning: choose images first
+            return;
+        }
         var that = this;
         this.cancelled = false;
-        this.setStateAndProgress("STARTING", 2, null, -1);
+        this.setNextToRender(0);
+        this.set('processing', true);
+        this.resetResults();
+        this.getJob(0).setStateAndProgress("STARTING", 2, null, -1);
         var targetWidth = this.get('outputWidth');
         var targetHeight = this.get('outputHeight');
+        var imageIds = this.jobs.map(function(s){return s.get('imageId')});
+        console.debug(imageIds);
         $.ajax({
             url: '/omero_3dscript/startRendering',
             data: {
-                imageId: imageId,
+                imageId: imageIds,
                 script: script,
                 targetWidth: targetWidth,
                 targetHeight: targetHeight,
@@ -59,11 +128,17 @@ var Model3Dscript = Backbone.Model.extend({
                     console.debug("error startRendering");
                     var err = data.error.trim();
                     var st = data.stacktrace;
-                    that.setStateAndProgress('ERROR: ' + err, -1, st, -1);
+                    that.getJob(0).setStateAndProgress('ERROR: ' + err, -1, st, -1); // needs to be called for a job
                 }
                 else {
-                    var basename = data.basename;
-                    that.updateState(basename);
+                    var basenames = data.basename;
+                    console.debug("basenames = " + data.basename);
+                    for(var i = 0; i < imageIds.length; i++) {
+                        that.getJob(i).set('basename', basenames[i]);
+                    }
+                    console.debug("before calling updateState");
+                    console.debug(that);
+                    that.updateState();
                 }
             },
             error: function(xhr, ajaxOptions, thrownError) {
@@ -72,11 +147,20 @@ var Model3Dscript = Backbone.Model.extend({
         });
     },
 
-    updateState: function(basename) {
+    updateState: function() {
+        console.debug("updateState()");
         var that = this;
+        var idx = this.get('nextToRender');
+        if(idx >= this.jobs.length)
+            return;
+        var job = this.getJob(idx);
+        console.debug("updateState");
+        console.debug(idx);
+        console.debug(job);
+        var basename = job.get('basename');
         setTimeout(function myTimer() {
             if(that.cancelled) {
-                that.cancelRendering(basename);
+                that.cancelRendering(basename); // TODO handle cancel for multiple jobs, maybe need to set processing to false?
                 return;
             }
             $.ajax({
@@ -94,30 +178,51 @@ var Model3Dscript = Backbone.Model.extend({
                     var progress = 100 * data.progress;
                     var state = data.state;
 
+                    console.debug("state = "  + state);
                     if(state.startsWith('ERROR')) {
                         var st = data.stacktrace;
-                        that.setStateAndProgress('ERROR', progress, st, -1);
+                        job.setStateAndProgress('ERROR', progress, st, -1);
+                        if(idx != that.jobs.length - 1) {
+                            that.setNextToRender(idx + 1);
+                            that.updateState();
+                        }
+                        else {
+                            that.set('processing', false);
+                        }
                     }
                     else if (state.startsWith('FINISHED')) {
-                        that.createAnnotation(basename, that.get('imageId'));
+                        console.debug(job);
+                        var type = data.type;
+                        var url = "/webclient/annotation/" + data.annotationId + "/";
+                        job.setResult(type, url);
+                        job.setStateAndProgress('FINISHED', 100, null, -1);
+                        if(idx != that.jobs.length - 1) {
+                            that.setNextToRender(idx + 1);
+                            that.updateState();
+                        }
+                        else {
+                            that.set('processing', false);
+                        }
                     }
                     else if (state.startsWith('QUEUED')) {
-                        that.setStateAndProgress(state, progress, null, pos);
-                        that.updateState(basename);
+                        job.setStateAndProgress(state, progress, null, pos);
+                        that.updateState();
                     }
                     else {
-                        that.setStateAndProgress(state, progress, null, pos);
-                        that.updateState(basename);
+                        job.setStateAndProgress(state, progress, null, pos);
+                        that.updateState();
                     }
                 },
                 error: function(xhr, ajaxOptions, thrownError) {
+                    // TODO show error in gui
                     console.debug("error in updateState " + thrownError);
                 }
             });
         }, 500);
     },
 
-    cancelRendering: function(basename) {
+    // TODO implement for basenames (plural)
+    cancelRendering: function(basenames) {
         var that = this;
         $.ajax({
             url: '/omero_3dscript/cancelRendering',
@@ -135,34 +240,40 @@ var Model3Dscript = Backbone.Model.extend({
         });
     },
 
-    createAnnotation: function(basename, imageId) {
-        this.setStateAndProgress('CREATE ATTACHMENT', 95, null, 0);
-        var that = this;
-        $.ajax({
-            url: '/omero_3dscript/createAnnotation',
-            data: {
-                basename: basename,
-                imageId: imageId
-            },
-            dataType: 'json',
-            success: function(data) {
-                if(data.error) {
-                    var err = data.error.trim();
-                    var st = data.stacktrace();
-                    that.setStateAndProgress('ERROR: ' + err, -1, st, -1);
-                }
-                else {
-                    var type = data.isVideo ? 'video' : 'image';
-                    var url = "/webclient/annotation/" + data.annotationId + "/";
-                    that.setResult(type, url);
-                    that.setStateAndProgress('FINISHED', 100, null, -1);
-                }
-            },
-            error: function(xhr, ajaxOptions, thrownError) {
-                console.debug("error in createAnnotation " + thrownError);
-            },
-        });
-    },
+//    createAnnotation: function() {
+//        var that = this;
+//        var idx = this.get('nextToRender');
+//        var job = this.jobs.at(idx);
+//        job.setStateAndProgress('CREATE ATTACHMENT', 95, null, 0);
+//        var basename = job.get('basename');
+//        var imageId = job.get('imageId');
+//        $.ajax({
+//            url: '/omero_3dscript/createAnnotation',
+//            data: {
+//                basename: basename,
+//                imageId: imageId
+//            },
+//            dataType: 'json',
+//            success: function(data) {
+//                if(data.error) {
+//                    var err = data.error.trim();
+//                    var st = data.stacktrace;
+//                    job.setStateAndProgress('ERROR: ' + err, -1, st, -1);
+//                    that.set('nextToRender', idx + 1);
+//                }
+//                else {
+//                    var type = data.isVideo ? 'video' : 'image';
+//                    var url = "/webclient/annotation/" + data.annotationId + "/";
+//                    job.setResult(type, url);
+//                    job.setStateAndProgress('FINISHED', 100, null, -1);
+//                    that.set('nextToRender', idx + 1);
+//                }
+//            },
+//            error: function(xhr, ajaxOptions, thrownError) {
+//                console.debug("error in createAnnotation " + thrownError);
+//            },
+//        });
+//    },
 });
 
 var AppView = Backbone.View.extend({
@@ -174,13 +285,59 @@ var AppView = Backbone.View.extend({
     },
 
     initialize: function() {
-        this.model.on('change:state', this.render, this);
+        this.model.on('change:processing', this.render, this);
+        this.model.on('change:nextToRender', this.jobIndexChanged, this);
+        this.model.jobs.on('update', this.jobsReset, this);
+        this.model.jobs.on('reset', this.jobsReset, this);
+        this.listenTo(this.model.jobs, 'add', this.oneJobAdded);
+        this.jobsReset();
+    },
+
+    oneJobAdded: function(job) {
+        console.debug("oneJobAdded");
+        console.debug(job);
+        var view = new ResultView({model: job});
+        this.$("#videoContainer").append(view.render().el);
+    },
+
+    jobsReset: function() {
+        console.debug("jobsReset");
+        this.$("#videoContainer").empty();
+        this.model.jobs.each(this.oneJobAdded, this);
+        this.jobIndexChanged();
+        this.renderColumns();
+    },
+
+    renderColumns: function() {
+        var minwidth=200;
+        var parentWidth = this.$("#videoContainer").outerWidth();
+        var nCols = Math.floor(parentWidth / minwidth);
+        if(nCols < 1)
+            nCols = 1;
+        if(nCols > 5)
+            nCols = 5;
+        if(nCols > this.model.jobs.length)
+            nCols = this.model.jobs.length;
+        var lut = ['100%', '50%', '33.3%', '25%', '20%'];
+        $(".preview").css("width", lut[nCols - 1]);
+    },
+
+    jobIndexChanged: function() {
+        console.debug("jobIndexChanged");
+        if(this.pv) {
+            delete this.pv;
+        }
+        var job = this.model.getCurrentJob();
+        console.debug(job);
+        if(job) {
+            this.pv = new ProgressView({model: job});
+        }
     },
 
     handleRenderButton: function(event) {
         var imageId = $("#imageId").val();
         var script = $("#script").val();
-        this.model.startRendering(imageId, script);
+        this.model.startRendering(script);
     },
 
     handleCancelButton: function(event) {
@@ -190,10 +347,8 @@ var AppView = Backbone.View.extend({
     render: function() {
         var renderbutton = $("#render-button");
         var cancelbutton = $("#cancel-button");
-        var state = this.model.get('state');
-        if(state.startsWith('CANCELLED') ||
-            state.startsWith('ERROR') ||
-            state.startsWith('FINISHED')) {
+        var processing = this.model.get('processing');
+        if(!processing) {
             cancelbutton.prop("disabled", true);
             renderbutton.prop("disabled", false);
         } else {
@@ -251,13 +406,46 @@ var ProgressView = Backbone.View.extend({
 });
 
 var ResultView = Backbone.View.extend({
-    el: $("#videoContainer"),
+
+    tagName: "div",
+
+    className: "preview",
 
     initialize: function() {
-        this.model.on('change:resultType change:resultURL', this.render, this);
+        this.model.on('change:resultURL', this.render, this);
+        this.model.on('change:nextToRender', this.render, this);
+        this.model.on('change:progress', this.renderProgress, this);
+        this.model.on('destroy', this.doremove, this);
+    },
+
+    doremove: function() {
+        console.debug("doremove");
+        this.remove();
+    },
+
+    /*
+     * https://stackoverflow.com/questions/11789665/jquery-animate-svg-element
+     * https://www.digitaldesignjournal.com/best-circular-progress-bar-html-css/
+     * https://codepen.io/web-tiki/pen/qEGvMN
+     */
+    renderProgress: function() {
+        var prog = this.model.get('progress');
+        var path = $("#path", this.$el);
+        var full = 188.0; // radius = 30, 2 * pi * 30 = 188;
+        path.animate(
+          {'foo':prog},
+          {
+            step: function(foo){
+              $(this).attr('stroke-dasharray', (full * foo / 100) + ',' + full);
+            },
+            duration: 100
+          }
+        );
     },
 
     render: function() {
+        console.debug("ResultView.render");
+        console.debug(this.model);
         var type = this.model.get('resultType');
         var url = this.model.get('resultURL');
         console.debug(this.el);
@@ -267,15 +455,34 @@ var ResultView = Backbone.View.extend({
                 'type': 'video/mp4'});
             var video = $("<video></video>")
                 .attr("controls", true)
-                .addClass("preview")
                 .append(src);
             this.$el.empty().append(video);
         }
-        else {
+        else if(type == 'image') {
             var img = $("<img>")
                 .attr({'src': url, 'type': 'image/png'})
-                .addClass("preview");
             this.$el.empty().append(img);
+        }
+        else if(type == 'none') {
+            var ph = $("<div>");
+            if(this.model.get('nextToRender')) {
+                ph.addClass("placeholder")
+                    .css("border", "1px solid #4caf50");
+                ph.html(
+                    '<svg id="roundprogress" viewbox="0 0 100 100">\n' +
+                    '    <circle cx="50" cy="50" r="45" fill="#4caf50"/>\n' +
+                    '    <path fill="none" stroke-linecap="round" stroke-width="10" stroke="#888"\n' +
+                    '        d="M50 20' +
+                    '           a 30 30 0 0 1 0 60' +
+                    '           a 30 30 0 0 1 0 -60"/>\n' +
+                    '    <path id="path" fill="none" stroke-linecap="round" stroke-width="10" stroke="#fff"\n' +
+                    '        stroke-dasharray="2,250"\n' +
+                    '        d="M50 20' +
+                    '           a 30 30 0 0 1 0 60' +
+                    '           a 30 30 0 0 1 0 -60"/>\n' +
+                    '</svg>');
+            }
+            this.$el.empty().append(ph);
         }
 
         return this;
@@ -283,13 +490,11 @@ var ResultView = Backbone.View.extend({
 });
 
 (function() {
-    var model = new Model3Dscript();
+    model = new Model3Dscript();
     var settingsView = new SettingsView({model: model});
     var imageView = new ImageView({model: model});
-    new ResultView({model: model});
-    new ProgressView({model: model});
     new QueueView({model: model});
-    new AppView({model: model});
+    var appView = new AppView({model: model});
 
     var settingsbutton = $("#settings");
     var imagebutton = $("#imagebutton");
@@ -298,6 +503,7 @@ var ResultView = Backbone.View.extend({
     function onresize() {
         var left = ($(window).width() - 600) / 2.0;
         $("#header").css({"padding-left": left + "px"});
+        appView.renderColumns();
     }
 
     function main() {

@@ -161,21 +161,40 @@ a.ui-button:active,
   margin-right: auto;
   border: black solid 1px;
   box-sizing: border-box;
+  overflow: hidden;
 }
 
 .preview {
   margin-left: auto;
   margin-right: auto;
-  display: block;
   position: relative;
+  width: 100%;
+  float: left;
+}
+
+.preview video {
+  display: block;
   width: 100%;
 }
 
+.preview img {
+  display: block;
+  width: 100%;
+}
+
+#roundprogress {
+  width: 20%;
+  position: absolute;
+  top: 40%;
+  left: 40%;
+}
+
 /* https://www.w3schools.com/howto/howto_css_aspect_ratio.asp */
-#placeholder {
+.preview .placeholder {
   width: 100%;
   background-color: black;
   padding-top: 75%;
+  position: relative; /* needed for absolute positioning of scale pie */
 }
 
 #footer {

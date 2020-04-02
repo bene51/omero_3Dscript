@@ -14,12 +14,15 @@ logger = logging.getLogger(__name__)
 
 @login_required()
 def getName(request, conn=None, **kwargs):
-     image_id = request.GET['image']
-     image = conn.getObject("Image", image_id)
-     if image is None:
-          return JsonResponse({'error': "Image " + image_id + " cannot be accessed"})
-     image_name = image.getName();
-     return JsonResponse({'name': image_name})
+     image_ids = request.GET.getlist('image[]')
+     names = []
+     for image_id in image_ids:
+         image = conn.getObject("Image", image_id)
+         if image is None:
+              return JsonResponse({'error': "Image " + image_id + " cannot be accessed"})
+         image_name = image.getName();
+         names.append(image_name)
+     return JsonResponse({'name': names})
 
 @login_required()
 def index(request, conn=None, **kwargs):
@@ -39,13 +42,18 @@ def getStateAndProgress(request, conn=None, **kwargs):
      logger.info("getting state from fiji: ")
      state, progress, position = fiji.getStateAndProgress(basename)
      logger.info("got state from fiji: " + state)
-     exc = ''
+     outputtype = ''
+     aId = -1
+     resp = {'state': state, 'progress': progress, 'position': position}
      if state.startswith('ERROR'):
           exc = fiji.getStacktrace(basename)
-          #with open(basename + ".err") as f:
-          #     exc = f.read()
+          resp['stacktrace'] = exc
+     elif state.startswith('FINISHED'):
+          outputtype, aId = fiji.getTypeAndAttachmentId(basename)
+          resp['type'] = outputtype
+          resp['annotationId'] = aId
      logger.info("return state: " + state)
-     return JsonResponse({'state': state, 'progress': progress, 'position': position, 'stacktrace': exc})
+     return JsonResponse(resp)
 
 @login_required()
 def cancelRendering(request, conn=None, **kwargs):
@@ -97,11 +105,15 @@ def startRendering(request, conn=None, **kwargs):
      """ Shows a subset of Z-planes for an image """
      try:
           basename = None
-          image_id = request.GET['imageId']
-          image = conn.getObject("Image", image_id)
-          if image is None:
-               raise Exception("Cannot retrieve image with id " + str(image_id))
-          image_name = image.getName()
+          image_ids = request.GET.getlist('imageId[]')
+          # image_id = request.GET['imageId']
+          image_names = []
+          for image_id in image_ids:
+              image = conn.getObject("Image", image_id)
+              if image is None:
+                   raise Exception("Cannot retrieve image with id " + str(image_id))
+              image_names.append(image.getName())
+
           user = conn.getUser().getName();
           s = request.GET['script']
           sessionId = conn.c.getSessionId()
@@ -112,6 +124,7 @@ def startRendering(request, conn=None, **kwargs):
           logger.info("proc id = " + str(proc))
           host = conn.host;
           logger.info("host = " + str(host))
+          idString = "+".join([str(i) for i in image_ids])
           #TODO do not try forever
           while True:
                try:
@@ -119,13 +132,13 @@ def startRendering(request, conn=None, **kwargs):
                          basename = fiji.startRendering(host, \
                               sessionId, \
                               s, \
-                              image_id, \
+                              idString, \
                               tgtWidth, \
                               tgtHeight)
                          break
                except pid.PidFileError:
                          print("already locked");
-          return JsonResponse({'basename': basename})
+          return JsonResponse({'basename': basename.split("+")})
      except Exception as exc:
           log = open("/tmp/errorlog.txt", "w")
           traceback.print_exc(file=log)

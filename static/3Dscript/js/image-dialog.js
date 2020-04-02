@@ -2,9 +2,12 @@ var ImageView = Backbone.View.extend({
 
     el: $("#dialog-newimage"),
 
+    oldvalue: null,
+
     initialize: function() {
         var self = this;
-        this.model.on('change:imageId change:imageName', this.render, this);
+        this.model.jobs.on('reset', this.render, this);
+        this.model.jobs.on('update', this.render, this);
         this.headertxt = $("#headertxt");
         this.imageId = $("#imageId");
         this.allFields = $([]).add(this.imageId);
@@ -27,7 +30,7 @@ var ImageView = Backbone.View.extend({
                     self.verify();
                 },
                 Cancel: function() {
-                    self.form[0].reset();
+                    self.imageId.val(self.oldvalue);
                     self.dialog.dialog("close");
                 }
             },
@@ -48,15 +51,16 @@ var ImageView = Backbone.View.extend({
     },
 
     render: function() {
-        var id = this.model.get('imageId');
-        var name = this.model.get('imageName');
-        this.imageId.val(id);
+        var name = this.model.getJob(0).get('imageName');
+        if(this.model.jobs.length > 1)
+            name += ", ...";
         this.headertxt.text(name);
         return this;
     },
 
     showDialog: function() {
         this.dialog.dialog("open");
+        this.oldvalue = this.imageId.val();
     },
 
     updateTips: function(t) {
@@ -80,7 +84,30 @@ var ImageView = Backbone.View.extend({
 
         if(!valid) {
             o.addClass("ui-state-error");
-            updateTips(n + " must be a whole number >= " + min);
+            this.updateTips(n + " must be a whole number >= " + min);
+        }
+        return valid;
+    },
+
+    string2Integers: function(s, min) {
+        return s.split(',').map(Number).filter(val => val >= min);
+    },
+
+    checkIntegers: function(o, n, min) {
+        var valid = true;
+        try {
+            var numbers = this.string2Integers(o.val(), min);
+            if(numbers.length > 0)
+                return numbers;
+
+            valid = false;
+        } catch(error) {
+            console.debug(error);
+            valid = false;
+        }
+        if(!valid) {
+            o.addClass("ui-state-error");
+            this.updateTips(n + " must be a list of whole numbers >= " + min);
         }
         return valid;
     },
@@ -88,37 +115,47 @@ var ImageView = Backbone.View.extend({
     verify: function() {
         this.allFields.removeClass("ui-state-error");
 
-        var valid = this.checkInteger(this.imageId, "Image ID", 0);
-        if(!valid)
+        var numbers = this.checkIntegers(this.imageId, "Image ID", 0);
+        if(numbers === false)
             return false;
 
         var self = this;
+        var names = [];
 
-        $.ajax({
-            url: '/omero_3dscript/getName',
-            data: {
-              image: self.imageId.val()
-            },
-            async: false,
-            dataType: 'json',
-            success: function(data) {
-              if(data.error) {
-                console.debug("error in verify: " + data.error);
-                self.updateTips(data.error);
-                valid = false;
-              }
-              else {
-                console.debug("success in verify");
-                self.headertxt.text(data.name);
-              }
-            },
-            error: function(xhr, ajaxOptions, thrownError) {
-              console.debug("error in startRendering " + thrownError);
-            }
-        });
+        var valid = true;
+
+        // for(var i = 0; i < numbers.length; i++) {
+            $.ajax({
+                url: '/omero_3dscript/getName',
+                data: {
+                  image: numbers
+                },
+                async: false,
+                dataType: 'json',
+                success: function(data) {
+                  if(data.error) {
+                    console.debug("error in verify: " + data.error);
+                    self.updateTips(data.error);
+                    valid = false;
+                  }
+                  else {
+                    console.debug("success in verify");
+                    names = data.name;
+                    console.debug(names);
+                  }
+                },
+                error: function(xhr, ajaxOptions, thrownError) {
+                  console.debug("error in startRendering " + thrownError);
+                  self.updateTips(thrownError);
+                  valid = false;
+                }
+            });
+        //    if(!valid)
+        //        break;
+        // }
 
         if(valid) {
-            this.model.setImage(this.imageId.val(), this.headertxt.text());
+            this.model.setImages(numbers, names);
             this.dialog.dialog("close");
         }
 
