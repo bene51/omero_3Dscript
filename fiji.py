@@ -95,8 +95,9 @@ def getTypeAndAttachmentId(basename):
 	logger.info("getTypeAndAttachmentId: " + typeAndAttachmentId)
 	toks = typeAndAttachmentId.split()
 	outputtype = toks[0]
-	annotationId = int(toks[1])
-	return outputtype, annotationId
+	videoAnnotationId = int(toks[1])
+	imageAnnotationId = int(toks[2])
+	return outputtype, videoAnnotationId, imageAnnotationId
 
 def cancelRendering(basename):
 	send('cancel ' + basename + '\n')

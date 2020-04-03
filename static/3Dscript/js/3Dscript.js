@@ -5,7 +5,8 @@ var ModelJob = Backbone.Model.extend({
             'imageName': '',
             'basename': '',
             'resultType': 'none', // either 'image' or 'video'
-            'resultURL': '',
+            'resultVideoURL': '',
+            'resultImageURL': '',
             'state': 'READY',
             'progress': 0,
             'position': 0,
@@ -15,11 +16,11 @@ var ModelJob = Backbone.Model.extend({
     },
 
     resetResult: function() {
-        this.set({'resultType': 'none', 'resultURL': ''});
+        this.set({'resultType': 'none', 'resultVideoURL': '', 'resultImageURL': ''});
     },
 
-    setResult: function(resultType, resultURL) {
-        this.set({'resultType': resultType, 'resultURL': resultURL});
+    setResult: function(resultType, resultVideoURL, resultImageURL) {
+        this.set({'resultType': resultType, 'resultVideoURL': resultVideoURL, 'resultImageURL': resultImageURL});
     },
 
     setStateAndProgress: function(state, progress, stacktrace, position) {
@@ -193,8 +194,9 @@ var Model3Dscript = Backbone.Model.extend({
                     else if (state.startsWith('FINISHED')) {
                         console.debug(job);
                         var type = data.type;
-                        var url = "/webclient/annotation/" + data.annotationId + "/";
-                        job.setResult(type, url);
+                        var vurl = "/webclient/annotation/" + data.videoAnnotationId + "/";
+                        var iurl = "/webclient/annotation/" + data.imageAnnotationId + "/";
+                        job.setResult(type, vurl, iurl);
                         job.setStateAndProgress('FINISHED', 100, null, -1);
                         if(idx != that.jobs.length - 1) {
                             that.setNextToRender(idx + 1);
@@ -412,7 +414,7 @@ var ResultView = Backbone.View.extend({
     className: "preview",
 
     initialize: function() {
-        this.model.on('change:resultURL', this.render, this);
+        this.model.on('change:resultImageURL', this.render, this);
         this.model.on('change:nextToRender', this.render, this);
         this.model.on('change:progress', this.renderProgress, this);
         this.model.on('destroy', this.doremove, this);
@@ -447,20 +449,23 @@ var ResultView = Backbone.View.extend({
         console.debug("ResultView.render");
         console.debug(this.model);
         var type = this.model.get('resultType');
-        var url = this.model.get('resultURL');
+        var vurl = this.model.get('resultVideoURL');
+        var iurl = this.model.get('resultImageURL');
         console.debug(this.el);
         if(type == 'video') {
             var src = $("<source>").attr({
-                'src': url,
+                'src': vurl,
                 'type': 'video/mp4'});
             var video = $("<video></video>")
                 .attr("controls", true)
+		.attr("preload", "none")
+		.attr("poster", iurl)
                 .append(src);
             this.$el.empty().append(video);
         }
         else if(type == 'image') {
             var img = $("<img>")
-                .attr({'src': url, 'type': 'image/png'})
+                .attr({'src': iurl, 'type': 'image/png'})
             this.$el.empty().append(img);
         }
         else if(type == 'none') {

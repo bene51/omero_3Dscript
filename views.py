@@ -49,9 +49,10 @@ def getStateAndProgress(request, conn=None, **kwargs):
           exc = fiji.getStacktrace(basename)
           resp['stacktrace'] = exc
      elif state.startswith('FINISHED'):
-          outputtype, aId = fiji.getTypeAndAttachmentId(basename)
+          outputtype, vaId, iaId = fiji.getTypeAndAttachmentId(basename)
           resp['type'] = outputtype
-          resp['annotationId'] = aId
+          resp['videoAnnotationId'] = vaId
+          resp['imageAnnotationId'] = iaId
      logger.info("return state: " + state)
      return JsonResponse(resp)
 
