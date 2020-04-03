@@ -97,7 +97,7 @@ var ImageView = Backbone.View.extend({
         return s.replace(/\|/g, "").split('image-').slice(1).map(Number).filter(val => val >= min);
     },
 
-    string2Integers: function(s, min) {
+    string2Images: function(s, min) {
         if(s.startsWith("http"))
             return this.string2IntegersFromLink(s, min);
         else
