@@ -89,8 +89,19 @@ var ImageView = Backbone.View.extend({
         return valid;
     },
 
-    string2Integers: function(s, min) {
+    string2IntegersFromCSV: function(s, min) {
         return s.split(',').map(Number).filter(val => val >= min);
+    },
+
+    string2IntegersFromLink: function(s, min) {
+        return s.replace(/\|/g, "").split('image-').slice(1).map(Number).filter(val => val >= min);
+    },
+
+    string2Integers: function(s, min) {
+        if(s.startsWith("http"))
+            return this.string2IntegersFromLink(s, min);
+        else
+            return this.string2IntegersFromCSV(s, min);
     },
 
     checkIntegers: function(o, n, min) {
