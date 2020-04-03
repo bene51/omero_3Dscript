@@ -13,16 +13,22 @@ import pid
 logger = logging.getLogger(__name__)
 
 @login_required()
-def getName(request, conn=None, **kwargs):
-     image_ids = request.GET.getlist('image[]')
-     names = []
+def getImages(request, conn=None, **kwargs):
+     dataset_ids = request.GET.getlist('dataset_id[]')
+     image_ids = request.GET.getlist('image_id[]')
+
+     images = []
+     for datasetId in dataset_ids:
+          for image in conn.getObjects('Image', opts={'dataset': datasetId}):
+               images.append({'id': image.getId(), 'name': image.getName()})
+
      for image_id in image_ids:
          image = conn.getObject("Image", image_id)
          if image is None:
               return JsonResponse({'error': "Image " + image_id + " cannot be accessed"})
-         image_name = image.getName();
-         names.append(image_name)
-     return JsonResponse({'name': names})
+         images.append({'id': image_id, 'name': image.getName()})
+
+     return JsonResponse({'images': images})
 
 @login_required()
 def index(request, conn=None, **kwargs):

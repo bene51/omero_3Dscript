@@ -104,13 +104,26 @@ var ImageView = Backbone.View.extend({
             return this.string2IntegersFromCSV(s, min);
     },
 
+    string2Datasets: function(s, min) {
+        return s.replace(/\|/g, "").split('dataset-').slice(1).map(Number).filter(val => val >= min);
+    },
+
     checkIntegers: function(o, n, min) {
         var valid = true;
+        var s = o.val();
         try {
-            var numbers = this.string2Integers(o.val(), min);
-            if(numbers.length > 0)
-                return numbers;
-
+            // if it's datasets
+            if(s.startsWith("http") && s.indexOf("dataset") != -1) {
+                var datasets = this.string2Datasets(s, min);
+                if(datasets.length > 0)
+                    return {'datasets': datasets};
+            }
+            // else assume it's images
+            else {
+                var images = this.string2Images(s, min);
+                if(images.length > 0)
+                    return {'images': images};
+            }
             valid = false;
         } catch(error) {
             console.debug(error);
@@ -126,42 +139,44 @@ var ImageView = Backbone.View.extend({
     verify: function() {
         this.allFields.removeClass("ui-state-error");
 
-        var numbers = this.checkIntegers(this.imageId, "Image ID", 0);
-        if(numbers === false)
+        var imagesOrDatasets = this.checkIntegers(this.imageId, "Image ID", 0);
+        if(imagesOrDatasets === false)
             return false;
 
         var self = this;
-        var names = [];
+        var images = [];
 
         var valid = true;
 
         $.ajax({
-            url: '/omero_3dscript/getName',
+            url: '/omero_3dscript/getImages',
             data: {
-              image: numbers
+                image_id: imagesOrDatasets.images,
+                dataset_id: imagesOrDatasets.datasets,
             },
             async: false,
             dataType: 'json',
             success: function(data) {
-              if(data.error) {
-                self.updateTips(data.error);
-                valid = false;
-              }
-              else {
-                console.debug("success in verify");
-                names = data.name;
-                console.debug(names);
-              }
+                if(data.error) {
+                    self.updateTips(data.error);
+                    valid = false;
+                }
+                else {
+                    console.debug("success in verify");
+                    // list of [{'id': x, 'name': 'n'}, ...]
+                    images = data.images;
+                    console.debug(images);
+                }
             },
             error: function(xhr, ajaxOptions, thrownError) {
-              console.debug("error in startRendering " + thrownError);
-              self.updateTips(thrownError);
-              valid = false;
+                console.debug("error in getImages " + thrownError);
+                self.updateTips(thrownError);
+                valid = false;
             }
         });
 
         if(valid) {
-            this.model.setImages(numbers, names);
+            this.model.setImages(images);
             this.dialog.dialog("close");
         }
 

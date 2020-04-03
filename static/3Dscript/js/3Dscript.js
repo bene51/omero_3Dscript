@@ -72,12 +72,13 @@ var Model3Dscript = Backbone.Model.extend({
             this.getJob(index).set('nextToRender', true);
     },
 
-    setImages: function(imageIds, imageNames) {
+    // list of [{'id': x, 'name': 'n'}, ...]
+    setImages: function(images) {
         var newJobs = [];
-        for(var i = 0; i < imageIds.length; i++) {
+        for(var i = 0; i < images.length; i++) {
             newJobs.push(new ModelJob({
-                'imageId': imageIds[i],
-                'imageName': imageNames[i],
+                'imageId': images[i].id,
+                'imageName': images[i].name,
             }));
         }
         this.jobs.reset(newJobs);
