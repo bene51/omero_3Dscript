@@ -65,8 +65,8 @@ def getStateAndProgress(request, conn=None, **kwargs):
 @login_required()
 def cancelRendering(request, conn=None, **kwargs):
      logger.info("cancelRendering")
-     basename = request.GET['basename']
-     fiji.cancelRendering(basename)
+     basenames = request.GET.getlist('basename[]')
+     fiji.cancelRendering(basenames)
      return JsonResponse({})
 
 @login_required()

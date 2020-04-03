@@ -162,7 +162,7 @@ var Model3Dscript = Backbone.Model.extend({
         var basename = job.get('basename');
         setTimeout(function myTimer() {
             if(that.cancelled) {
-                that.cancelRendering(basename); // TODO handle cancel for multiple jobs, maybe need to set processing to false?
+                that.cancelRendering(basename);
                 return;
             }
             $.ajax({
@@ -224,18 +224,20 @@ var Model3Dscript = Backbone.Model.extend({
         }, 500);
     },
 
-    // TODO implement for basenames (plural)
     cancelRendering: function(basenames) {
         var that = this;
         $.ajax({
             url: '/omero_3dscript/cancelRendering',
             data: {
-                basename: basename
+                basenames: basenames
             },
             dataType: 'json',
             success: function(data) {
                 console.debug("cancelled");
-                that.setStateAndProgress("CANCELLED", -1, null, -1);
+                that.jobs.each(function(job) {
+                    job.setStateAndProgress("CANCELLED", -1, null, -1);
+                });
+                that.set('processing', false);
             },
             error: function(xhr, ajaxOptions, thrownError) {
                 console.debug("error in updateState " + thrownError);

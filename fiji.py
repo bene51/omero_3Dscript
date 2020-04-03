@@ -99,8 +99,8 @@ def getTypeAndAttachmentId(basename):
 	imageAnnotationId = int(toks[2])
 	return outputtype, videoAnnotationId, imageAnnotationId
 
-def cancelRendering(basename):
-	send('cancel ' + basename + '\n')
+def cancelRendering(basenames):
+	send('cancel ' + " ".join(basenames) + '\n')
 
 def run(host, sessionid, basename, imageid, w, h):
 	startRendering(host, sessionid, basename, imageid, w, h)
