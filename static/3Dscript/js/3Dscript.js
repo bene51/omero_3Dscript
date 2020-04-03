@@ -452,22 +452,34 @@ var ResultView = Backbone.View.extend({
         var type = this.model.get('resultType');
         var vurl = this.model.get('resultVideoURL');
         var iurl = this.model.get('resultImageURL');
+        var imageName = this.model.get('imageName');
+        var multiple = this.model.collection.length > 1;
         console.debug(this.el);
+        var title = $("<div>")
+            .addClass("title")
+            .text(imageName);
+
         if(type == 'video') {
             var src = $("<source>").attr({
                 'src': vurl,
                 'type': 'video/mp4'});
             var video = $("<video></video>")
                 .attr("controls", true)
-		.attr("preload", "none")
-		.attr("poster", iurl)
+                .attr("preload", "none")
+                .attr("poster", iurl)
                 .append(src);
-            this.$el.empty().append(video);
+            this.$el.empty();
+            if(multiple)
+                this.$el.append(title)
+            this.$el.append(video);
         }
         else if(type == 'image') {
             var img = $("<img>")
                 .attr({'src': iurl, 'type': 'image/png'})
-            this.$el.empty().append(img);
+            this.$el.empty();
+            if(multiple)
+                this.$el.append(title)
+            this.$el.append(img);
         }
         else if(type == 'none') {
             var ph = $("<div>");
@@ -487,10 +499,12 @@ var ResultView = Backbone.View.extend({
                     '           a 30 30 0 0 1 0 60' +
                     '           a 30 30 0 0 1 0 -60"/>\n' +
                     '</svg>');
+                this.$el.empty();
+                if(multiple)
+                    this.$el.append(title)
+                this.$el.append(ph);
             }
-            this.$el.empty().append(ph);
         }
-
         return this;
     },
 });
