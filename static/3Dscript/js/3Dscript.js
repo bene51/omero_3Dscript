@@ -57,7 +57,7 @@ var Model3Dscript = Backbone.Model.extend({
     },
 
     resetResults: function() {
-        this.jobs.each(function(job) { job.resetResult });
+        this.jobs.each(function(job) { job.resetResult(); });
     },
 
     setNextToRender: function(index) {
