@@ -6,6 +6,7 @@ import os
 import logging
 from subprocess import Popen, PIPE
 import base64
+from . import omero_3Dscript_settings
 
 logger = logging.getLogger(__name__)
 
@@ -54,7 +55,9 @@ def startFiji(co):
 def send(msg):
 	s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 	try:
-		s.connect(('localhost', 3333))
+                processingHost = omero_3Dscript_settings.OMERO_3DSCRIPT_PROCESSING_SERVER
+                logger.info("processingHost: " + processingHost);
+                s.connect((processingHost, 3333))
 	except socket.error as e:
 		co = threading.Event()
 		threading.Thread(name='startFiji', target=startFiji, args=(co,)).start()
@@ -76,7 +79,10 @@ def checkFijiPath():
 
 
 def startRendering(host, sessionid, script, imageid, w, h):
-	return send("render %s %s %s %s %s %s\n" % (host, sessionid, base64.urlsafe_b64encode(script.encode('utf-8')).decode('utf-8'), imageid, w, h)).strip()
+	omeroHost = omero_3Dscript_settings.OMERO_3DSCRIPT_OMERO_SERVER_EXTERNAL_IP;
+	if len(omeroHost.strip()) == 0:
+		omeroHost = host;
+	return send("render %s %s %s %s %s %s\n" % (omeroHost, sessionid, base64.urlsafe_b64encode(script.encode('utf-8')).decode('utf-8'), imageid, w, h)).strip()
 
 def getStacktrace(basename):
 	return base64.urlsafe_b64decode(send("getstacktrace %s\n" % (basename)).strip().encode('utf-8')).decode('utf-8')

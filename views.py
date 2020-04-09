@@ -126,7 +126,9 @@ def startRendering(request, conn=None, **kwargs):
           sessionId = conn.c.getSessionId()
           tgtWidth = request.GET['targetWidth']
           tgtHeight = request.GET['targetHeight']
-          fiji.checkFijiPath()
+          # do not check the fiji path because we might use
+          # the fiji on a different computer
+          # fiji.checkFijiPath()
           proc = os.getpid()
           logger.info("proc id = " + str(proc))
           host = conn.host;
