@@ -82,7 +82,7 @@ def startRendering(host, sessionid, script, imageid, w, h):
 	omeroHost = omero_3Dscript_settings.OMERO_3DSCRIPT_OMERO_SERVER_EXTERNAL_IP;
 	if len(omeroHost.strip()) == 0:
 		omeroHost = host;
-	return send("render %s %s %s %s %s %s\n" % (omeroHost, sessionid, base64.urlsafe_b64encode(script.encode('utf-8')).decode('utf-8'), imageid, w, h)).strip()
+	return send("renderOMERO %s %s %s %s %s %s\n" % (omeroHost, sessionid, base64.urlsafe_b64encode(script.encode('utf-8')).decode('utf-8'), imageid, w, h)).strip()
 
 def getStacktrace(basename):
 	return base64.urlsafe_b64decode(send("getstacktrace %s\n" % (basename)).strip().encode('utf-8')).decode('utf-8')
