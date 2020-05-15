@@ -567,7 +567,7 @@ class Interpreter {
 	}
 
 	space(parsingResult) {
-    parsingResult.setAutocompletion(new Autocompletion([""], this.lexer.index));
+    parsingResult.setAutocompletion(new Autocompletion([], this.lexer.index));
 		return this.lexer.getNextTokenFromType(TokenType.SPACE, false);
 	}
 

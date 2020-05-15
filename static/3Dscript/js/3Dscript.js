@@ -609,14 +609,16 @@ var ResultView = Backbone.View.extend({
                 return false;
             },
             select: function( event, ui ) {
-                console.debug("Selected: " + ui.item.value);
+                console.debug("Selected: *" + ui.item.value + "*");
+                if(!ui.item.value)
+                    return false;
                 var txt = this.value;
                 console.debug(txt);
                 var insertPos = this.selectionEnd - this.alreadyEnteredLength;
                 console.debug("insertPos = "  + insertPos);
-                console.debug("left = " + txt.substring(0, insertPos));
+                console.debug("left = *" + txt.substring(0, insertPos) + "*");
                 var repl = txt.substring(0, insertPos) + ui.item.value + " " + txt.substring(insertPos + this.alreadyEnteredLength, txt.length);
-                console.debug("replace: " + repl);
+                console.debug("replace: *" + repl + "*");
                 this.value = repl;
                 this.selectionStart = this.selectionEnd = insertPos + ui.item.value.length + 1;
                 var e = $.Event('keydown', {keyCode: 32 });
