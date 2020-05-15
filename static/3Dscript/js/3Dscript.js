@@ -544,9 +544,15 @@ var ResultView = Backbone.View.extend({
             imageView.showDialog();
         });
 
-        if($("#imageId").val() < 0) {
+        var imageId = $("#imageId").val();
+        if(imageId < 0) {
             $("#imageId").val('');
             imageView.showDialog();
+        }
+        else {
+	    // list of [{'id': x, 'name': 'n'}, ...]
+            var imageName = $("#headertxt").text();
+            model.setImages([{'id': imageId, 'name': imageName}]);
         }
 
         $("#script").bind("keydown", function(event) {
