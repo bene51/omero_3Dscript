@@ -571,18 +571,20 @@ var ResultView = Backbone.View.extend({
         }
 
         $("#script").bind("keydown", function(event) {
-            console.debug("*" + $(this).data("ui-autocomplete").menu.visible);
-            if(event.keyCode === $.ui.keyCode.TAB && $(this).data("ui-autocomplete").menu.active) {
+            console.debug("*" + $(this).data("ui-autocomplete").menu.element.is(":visible"));
+            if(event.keyCode === $.ui.keyCode.TAB && $(this).data("ui-autocomplete").menu.element.is(":visible")) {
                 event.preventDefault();
             }
-            if(event.keyCode === $.ui.keyCode.ENTER) {
+            if(event.keyCode === $.ui.keyCode.ENTER && !$(this).data("ui-autocomplete").menu.element.is(":visible")) {
               var caret = $("#script")[0].selectionStart;
               var text = $("#script").val();
               if(caret > 0) {
                 var lastChar = text.charAt(caret - 1);
                 var textBefore = text.substring(0, caret);
                 var textAfter = text.substring(caret);
-                if(lastChar === ":") {
+                var lines = textBefore.split("\n");
+                var lastLineStartsWithDash = lines.length > 0 && lines[lines.length - 1].startsWith("- ");
+                if(lastChar === ":" || lastLineStartsWithDash) {
                   let newtext = textBefore + "\n- " + textAfter;
                   $("#script")[0].value = newtext;
                   event.preventDefault();
@@ -591,7 +593,10 @@ var ResultView = Backbone.View.extend({
                   $("#script")[0].selectionEnd = caret;
                   var e = $.Event('keydown', {keyCode: 32 });
                   $('#script').trigger(e);
-                }
+                } else {
+                  var lines = textBefore.split("\n");
+                  console.debug("lines = " + lines);
+		}
               }
             }
         });
