@@ -528,6 +528,20 @@ var ResultView = Backbone.View.extend({
         appView.renderColumns();
     }
 
+    function initializeScriptAreaSize() {
+        var scriptY = $("#script").position().top;
+        var bodyHeight = $("body").height();
+        var buttonsHeight = $("#buttons").outerHeight(true) + 40; /* margin-bottom of content */
+        var footerHeight = $("#footer").outerHeight(true) + 5 /* bottom */ + 10 /* top */;
+
+        var scriptHeight = bodyHeight - scriptY - buttonsHeight - footerHeight;
+        var minHeight = 250;
+        if(scriptHeight < minHeight)
+          scriptHeight = minHeight;
+
+        $("#script").height(scriptHeight)
+    }
+
     function main() {
     
         $(window).resize(function() {
@@ -535,6 +549,7 @@ var ResultView = Backbone.View.extend({
         });
     
         onresize();
+        initializeScriptAreaSize();
 
         settingsbutton.on("click", function() {
             settingsView.showDialog();

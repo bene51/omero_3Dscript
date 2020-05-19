@@ -120,7 +120,7 @@ body {
    *   20 + 30 + 10 + 450 + 30 + 25 + 20 + 10 + 30
    */
   /* min-height: calc(100vh - 625px); */
-  height: 250px;
+  height: 100px;
   font-family: monospace;
   font-size: 10pt;
   line-height: 15px;
