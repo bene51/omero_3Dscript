@@ -51,8 +51,11 @@ var ImageView = Backbone.View.extend({
     },
 
     render: function() {
-        var name = this.model.getJob(0).get('imageName');
-        if(this.model.jobs.length > 1)
+        var l = this.model.jobs.length;
+        var name = "";
+        if(l > 0)
+            name = this.model.getJob(0).get('imageName');
+        if(l > 1)
             name += ", ...";
         this.headertxt.text(name);
         return this;

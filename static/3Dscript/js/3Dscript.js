@@ -81,6 +81,8 @@ var Model3Dscript = Backbone.Model.extend({
                 'imageName': images[i].name,
             }));
         }
+        for(var i = this.jobs.length - 1; i >= 0; i--)
+	    this.jobs.at(i).destroy();
         this.jobs.reset(newJobs);
         this.setNextToRender(-1);
         this.setNextToRender(0);
