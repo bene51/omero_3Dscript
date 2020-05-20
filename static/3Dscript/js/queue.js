@@ -11,8 +11,10 @@ var QueueView = Backbone.View.extend({
 
     el: $("#dialog-queue"),
 
+    job: null,
+
     initialize: function() {
-        this.model.on('change:position', this.render, this);
+        this.model.jobs.on('reset', this.updateJob, this);
         this.dialog = $("#dialog-queue").dialog({
             autoOpen: false,
             resizable: false,
@@ -25,8 +27,21 @@ var QueueView = Backbone.View.extend({
         });
     },
 
+    updateJob: function() {
+        if(this.job != null)
+            this.job.off('change:position');
+        this.job = null;
+        if(this.model.jobs.length > 0) {
+            this.job = this.model.jobs.at(0);
+            this.job.on('change:position', this.render, this);
+            console.debug("job is now " + this.job.basename);
+        }
+    },
+
     render: function() {
-        var pos = this.model.get('position') - 1;
+        if(this.job == null)
+            return this;
+        var pos = this.job.get('position') - 1;
         var dialog = this.$el;
         if(pos < 0 && dialog.dialog("isOpen")) {
             dialog.dialog("close")
