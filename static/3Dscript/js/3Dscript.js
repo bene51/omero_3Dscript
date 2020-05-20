@@ -162,7 +162,8 @@ var Model3Dscript = Backbone.Model.extend({
         var basename = job.get('basename');
         setTimeout(function myTimer() {
             if(that.cancelled) {
-                that.cancelRendering(basename);
+                var basenames = that.jobs.map(function(s){return s.get('basename')});
+                that.cancelRendering(basenames);
                 return;
             }
             $.ajax({
@@ -229,7 +230,7 @@ var Model3Dscript = Backbone.Model.extend({
         $.ajax({
             url: '/omero_3dscript/cancelRendering',
             data: {
-                basenames: basenames
+                basename: basenames
             },
             dataType: 'json',
             success: function(data) {
