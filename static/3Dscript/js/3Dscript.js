@@ -491,12 +491,13 @@ var ResultView = Backbone.View.extend({
                     .css("border", "1px solid #4caf50");
                 ph.html(
                     '<svg id="roundprogress" viewbox="0 0 100 100">\n' +
-                    '    <circle cx="50" cy="50" r="45" fill="#4caf50"/>\n' +
-                    '    <path fill="none" stroke-linecap="round" stroke-width="10" stroke="#888"\n' +
+                    // '    <circle cx="50" cy="50" r="45" fill="#4caf50"/>\n' +
+                    '    <path fill="none" stroke-linecap="round" stroke-width="6" stroke="#444"\n' +
                     '        d="M50 20' +
                     '           a 30 30 0 0 1 0 60' +
                     '           a 30 30 0 0 1 0 -60"/>\n' +
-                    '    <path id="path" fill="none" stroke-linecap="round" stroke-width="10" stroke="#fff"\n' +
+                    // '    <path id="path" fill="none" stroke-linecap="round" stroke-width="10" stroke="#fff"\n' +
+                    '    <path id="path" fill="none" stroke-linecap="round" stroke-width="6" stroke="#4caf50"\n' +
                     '        stroke-dasharray="2,250"\n' +
                     '        d="M50 20' +
                     '           a 30 30 0 0 1 0 60' +
