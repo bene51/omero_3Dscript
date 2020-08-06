@@ -44,12 +44,14 @@ var QueueView = Backbone.View.extend({
         var pos = this.job.get('position') - 1;
         var dialog = this.$el;
         if(pos < 0 && dialog.dialog("isOpen")) {
-            dialog.dialog("close")
+            dialog.dialog("close");
             pos = this.bx.length - 1;
             SVG('#bgroup').center(this.bx[pos], this.by[pos])
                 .size(this.bw[pos], this.bh[pos]);
             return this;
         }
+	if(pos < 0)
+            return this;
         if(pos > 0 && !dialog.dialog("isOpen"))
             dialog.dialog("open");
 
