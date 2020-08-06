@@ -132,7 +132,7 @@ var Model3Dscript = Backbone.Model.extend({
                     console.debug("error startRendering");
                     var err = data.error.trim();
                     var st = data.stacktrace;
-                    that.getJob(0).setStateAndProgress('ERROR: ' + err, -1, st, -1); // needs to be called for a job
+                    that.getJob(0).setStateAndProgress('ERROR: ' + err, -1, st, 0); // needs to be called for a job
                 }
                 else {
                     var basenames = data.basename;
@@ -186,7 +186,7 @@ var Model3Dscript = Backbone.Model.extend({
                     console.debug("state = "  + state);
                     if(state.startsWith('ERROR')) {
                         var st = data.stacktrace;
-                        job.setStateAndProgress('ERROR', progress, st, -1);
+                        job.setStateAndProgress('ERROR', progress, st, 0);
                         if(idx != that.jobs.length - 1) {
                             that.setNextToRender(idx + 1);
                             that.updateState();
@@ -201,7 +201,7 @@ var Model3Dscript = Backbone.Model.extend({
                         var vurl = "/webclient/annotation/" + data.videoAnnotationId + "/";
                         var iurl = "/webclient/annotation/" + data.imageAnnotationId + "/";
                         job.setResult(type, vurl, iurl);
-                        job.setStateAndProgress('FINISHED', 100, null, -1);
+                        job.setStateAndProgress('FINISHED', 100, null, 0);
                         if(idx != that.jobs.length - 1) {
                             that.setNextToRender(idx + 1);
                             that.updateState();
