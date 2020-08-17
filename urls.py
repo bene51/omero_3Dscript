@@ -6,6 +6,5 @@ urlpatterns = [
 	url(r'^startRendering$', views.startRendering, name='3Dscript_startRendering'),
 	url(r'^getImages$', views.getImages, name='3Dscript_getImages'),
 	url(r'^getStateAndProgress$', views.getStateAndProgress, name='3Dscript_getStateAndProgress'),
-	url(r'^createAnnotation$', views.createAnnotation, name='3Dscript_createAnnotation'),
 	url(r'^cancelRendering$', views.cancelRendering, name='3Dscript_cancelRendering'),
 ]

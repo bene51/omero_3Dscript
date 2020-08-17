@@ -70,44 +70,6 @@ def cancelRendering(request, conn=None, **kwargs):
      return JsonResponse({})
 
 @login_required()
-def createAnnotation(request, conn=None, **kwargs):
-     try:
-          # raise Exception("Cannot create Annotation")
-          basename = request.GET['basename']
-          imageid = request.GET['imageId']
-          image = conn.getObject("Image", imageid)
-          animationfile = basename + '.animation.txt'
-          namespace = "oice/3Dscript"
-          gid = image.getDetails().getGroup().getId()
-          conn.SERVICE_OPTS.setOmeroGroup(gid)
-          file_ann = conn.createFileAnnfromLocalFile(animationfile, mimetype="text/plain", ns=namespace, desc=None)
-          image.linkAnnotation(file_ann)
-          file_ann = None
-          isVideo = False
-          mp4file = basename + '.mp4'
-          if os.path.isfile(mp4file):
-               file_ann = conn.createFileAnnfromLocalFile(mp4file, mimetype="video/mp4", ns=namespace, desc=None)
-               isVideo = True
-          else:
-               pngfile = basename + '.png'
-               file_ann = conn.createFileAnnfromLocalFile(pngfile, mimetype="image/png", ns=namespace, desc=None)
-          image.linkAnnotation(file_ann)
-          aId = file_ann.getId()
-          # os.remove(avifile)
-          # os.remove(mp4file)
-          # os.remove(animationfile)
-          # os.remove(macrofile)
-          return JsonResponse({'annotationId': aId, 'isVideo': isVideo})
-     except Exception as exc:
-          log = open("/tmp/errorlog.txt", "w")
-          traceback.print_exc(file=log)
-          log.close()
-          stacktrace = traceback.format_exc()
-          return JsonResponse({'error': str(exc), 'stacktrace': stacktrace})
-
-
-
-@login_required()
 def startRendering(request, conn=None, **kwargs):
      """ Shows a subset of Z-planes for an image """
      try:

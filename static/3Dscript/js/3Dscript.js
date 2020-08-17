@@ -247,41 +247,6 @@ var Model3Dscript = Backbone.Model.extend({
             }
         });
     },
-
-//    createAnnotation: function() {
-//        var that = this;
-//        var idx = this.get('nextToRender');
-//        var job = this.jobs.at(idx);
-//        job.setStateAndProgress('CREATE ATTACHMENT', 95, null, 0);
-//        var basename = job.get('basename');
-//        var imageId = job.get('imageId');
-//        $.ajax({
-//            url: '/omero_3dscript/createAnnotation',
-//            data: {
-//                basename: basename,
-//                imageId: imageId
-//            },
-//            dataType: 'json',
-//            success: function(data) {
-//                if(data.error) {
-//                    var err = data.error.trim();
-//                    var st = data.stacktrace;
-//                    job.setStateAndProgress('ERROR: ' + err, -1, st, -1);
-//                    that.set('nextToRender', idx + 1);
-//                }
-//                else {
-//                    var type = data.isVideo ? 'video' : 'image';
-//                    var url = "/webclient/annotation/" + data.annotationId + "/";
-//                    job.setResult(type, url);
-//                    job.setStateAndProgress('FINISHED', 100, null, -1);
-//                    that.set('nextToRender', idx + 1);
-//                }
-//            },
-//            error: function(xhr, ajaxOptions, thrownError) {
-//                console.debug("error in createAnnotation " + thrownError);
-//            },
-//        });
-//    },
 });
 
 var AppView = Backbone.View.extend({
