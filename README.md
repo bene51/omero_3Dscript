@@ -36,11 +36,11 @@ OMERO.3Dscript needs to be installed on the machine that runs OMERO.web.
     * Find out where OMERO.web is installed:
     install_dir=pip show omero-web | grep Location | cut -d' ' -f 2
     * cd $install_dir
-    * git clone https://bene51@bitbucket.org/bene51/omero_3dscript.git
+    * git clone https://github.com/bene51/omero_3Dscript.git
     * pip install pid
 
 * Add it to the OMERO.web UI:
-    * omero config append omero.web.apps '"omero_3dscript"'
+    * omero config append omero.web.apps '"omero_3Dscript"'
     * omero config append omero.web.ui.top_links '["3Dscript", "3Dscript_index", {"title": "Open 3Dscript in a new tab", "target": "_blank"}]' && \
     * omero config append omero.web.open_with '["3Dscript", "3Dscript_index", {"supported_objects": ["image"], "target": "_blank", "label": "3Dscript"}]'
 
