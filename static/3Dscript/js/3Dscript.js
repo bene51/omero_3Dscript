@@ -1,17 +1,17 @@
 var ModelJob = Backbone.Model.extend({
     defaults: function() {
         return {
-            'imageId': -1,
-            'imageName': '',
-            'basename': '',
-            'resultType': 'none', // either 'image' or 'video'
-            'resultVideoURL': '',
-            'resultImageURL': '',
-            'state': 'READY',
-            'progress': 0,
-            'position': 0,
-            'stacktrace': '',
-            'nextToRender': false,
+            'imageId': -1,          // the OMERO image id of the image to render
+            'imageName': '',        // the OMERO image name (to be displayed in the headeer)
+            'basename': '',         // identifies the rendering job. TODO
+            'resultType': 'none',   // output type, either 'image' or 'video'
+            'resultVideoURL': '',   // URL of the output video
+            'resultImageURL': '',   // URL of the output image
+            'state': 'READY',       // state of the rendering job, read from Fiji
+            'progress': 0,          // progress of the rendering job [0;1], read from Fiji
+            'position': 0,          // position of this job in the queue, 0 means this job is currently processed
+            'stacktrace': '',       // stacktrace in case an error occurred
+            'nextToRender': false,  // true if this job is the next one to render
         }
     },
 
@@ -72,7 +72,7 @@ var Model3Dscript = Backbone.Model.extend({
             this.getJob(index).set('nextToRender', true);
     },
 
-    // list of [{'id': x, 'name': 'n'}, ...]
+    // The specified parameter must be a list of [{'id': x, 'name': 'n'}, ...]
     setImages: function(images) {
         var newJobs = [];
         for(var i = 0; i < images.length; i++) {
@@ -81,9 +81,12 @@ var Model3Dscript = Backbone.Model.extend({
                 'imageName': images[i].name,
             }));
         }
+        // remove and clean up old jobs
         for(var i = this.jobs.length - 1; i >= 0; i--)
 	    this.jobs.at(i).destroy();
+        // set new jobs
         this.jobs.reset(newJobs);
+        // make sure the value changes so that the views get notified
         this.setNextToRender(-1);
         this.setNextToRender(0);
     },
@@ -119,7 +122,7 @@ var Model3Dscript = Backbone.Model.extend({
         var imageIds = this.jobs.map(function(s){return s.get('imageId')});
         console.debug(imageIds);
         $.ajax({
-            url: '/omero_3dscript/startRendering',
+            url: '/3Dscript/startRendering',
             data: {
                 imageId: imageIds,
                 script: script,
@@ -142,6 +145,8 @@ var Model3Dscript = Backbone.Model.extend({
                     }
                     console.debug("before calling updateState");
                     console.debug(that);
+                    // call updateState(), which calls itself until the
+                    // rendering job has finished
                     that.updateState();
                 }
             },
@@ -169,7 +174,7 @@ var Model3Dscript = Backbone.Model.extend({
                 return;
             }
             $.ajax({
-                url: '/omero_3dscript/getStateAndProgress',
+                url: '/3Dscript/getStateAndProgress',
                 data: {
                     basename: basename
                 },
@@ -230,7 +235,7 @@ var Model3Dscript = Backbone.Model.extend({
     cancelRendering: function(basenames) {
         var that = this;
         $.ajax({
-            url: '/omero_3dscript/cancelRendering',
+            url: '/3Dscript/cancelRendering',
             data: {
                 basename: basenames
             },
@@ -350,8 +355,10 @@ var ProgressView = Backbone.View.extend({
         console.debug("ProgressView.render(" + state + ", " + progress + ", " + stacktrace + ")");
         var pbar = $('#bar');
         var label = $('#barlabel');
-        if(progress >= 0)
-            pbar.stop().animate({"width": progress + '%'}, 100);
+        if(progress >= 0) {
+            // pbar.stop().animate({"width": progress + '%'}, 100);
+            pbar.css("width", progress + '%');
+	}
         if(state) {
             label[0].innerHTML = state;
             if(state.startsWith('ERROR')) {
@@ -442,6 +449,10 @@ var ResultView = Backbone.View.extend({
             if(multiple)
                 this.$el.append(title)
             this.$el.append(video);
+            // var bodyHeight = $("body").height();
+            // var scriptTop = $("#script").offset().top;
+            // $("html").animate({scrollTop: scriptTop - bodyHeight}, 300);
+            $('html, body').animate({scrollTop: $(document).height()}, 500);
         }
         else if(type == 'image') {
             var img = $("<img>")
@@ -450,6 +461,10 @@ var ResultView = Backbone.View.extend({
             if(multiple)
                 this.$el.append(title)
             this.$el.append(img);
+            // var bodyHeight = $("body").height();
+            // var scriptTop = $("#script").offset().top;
+            // $("html").animate({scrollTop: scriptTop - bodyHeight}, 300);
+            $('html, body').animate({scrollTop: $(document).height()}, 500);
         }
         else if(type == 'none') {
             var ph = $("<div>");
@@ -474,6 +489,10 @@ var ResultView = Backbone.View.extend({
                 if(multiple)
                     this.$el.append(title)
                 this.$el.append(ph);
+                // var bodyHeight = $("body").height();
+                // var scriptTop = $("#script").offset().top;
+                // $("html").animate({scrollTop: scriptTop - bodyHeight}, 300);
+                $('html, body').animate({scrollTop: $(document).height()}, 500);
             }
         }
         return this;
@@ -491,12 +510,21 @@ var ResultView = Backbone.View.extend({
     var imagebutton = $("#imagebutton");
 
 
+    /**
+     * - Align the header text with the video and textarea
+     * - Adjust the number of columns in case there are
+     *   multiple renderings.
+     */
     function onresize() {
         var left = ($(window).width() - 600) / 2.0;
         $("#header").css({"padding-left": left + "px"});
         appView.renderColumns();
     }
 
+    /**
+     * Set the initial height of the script textarea so that it fills
+     * all the available (vertical) space.
+     */
     function initializeScriptAreaSize() {
         var scriptY = $("#script").position().top;
         var bodyHeight = $("body").height();
@@ -504,7 +532,7 @@ var ResultView = Backbone.View.extend({
         var footerHeight = $("#footer").outerHeight(true) + 5 /* bottom */ + 10 /* top */;
 
         var scriptHeight = bodyHeight - scriptY - buttonsHeight - footerHeight;
-        var minHeight = 250;
+        var minHeight = 150;
         if(scriptHeight < minHeight)
           scriptHeight = minHeight;
 
@@ -528,6 +556,10 @@ var ResultView = Backbone.View.extend({
             imageView.showDialog();
         });
 
+        /*
+	 * If imageId < 0 (which is the case when opening OMERO.3Dscript
+	 * via the OMERO.web top link), display the new image dialog.
+	 */
         var imageId = $("#imageId").val();
         if(imageId < 0) {
             $("#imageId").val('');
@@ -539,6 +571,9 @@ var ResultView = Backbone.View.extend({
             model.setImages([{'id': imageId, 'name': imageName}]);
         }
 
+        /*
+	 * For autocompletion
+	 */
         $("#script").bind("keydown", function(event) {
             console.debug("*" + $(this).data("ui-autocomplete").menu.element.is(":visible"));
             if(event.keyCode === $.ui.keyCode.TAB && $(this).data("ui-autocomplete").menu.element.is(":visible")) {
@@ -576,8 +611,15 @@ var ResultView = Backbone.View.extend({
             ul.css("width: 100%;");
         }
 
+        /*
+	 * Make the script's textarea grow automatically to fill
+	 * the available (vertical) space.
+	 */
         $("#script").autogrow();
 
+        /*
+	 * The remainder deals with autocompletion.
+	 */
         $("#script").autocomplete({
             minLength: 0,
             delay: 0,

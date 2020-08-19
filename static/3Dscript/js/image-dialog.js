@@ -152,7 +152,7 @@ var ImageView = Backbone.View.extend({
         var valid = true;
 
         $.ajax({
-            url: '/omero_3dscript/getImages',
+            url: '/3Dscript/getImages',
             data: {
                 image_id: imagesOrDatasets.images,
                 dataset_id: imagesOrDatasets.datasets,
