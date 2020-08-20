@@ -23,15 +23,15 @@ OMERO.3Dscript needs to be installed on the machine that runs OMERO.web.
     mkdir $FIJI_HOME
     cd `dirname $FIJI_HOME`
     wget https://downloads.imagej.net/fiji/latest/fiji-linux64.zip
-    unzip Fiji-linux64.zip
+    unzip fiji-linux64.zip
     cd Fiji.app
     ./ImageJ-linux64 --update add-update-site 3Dscript https://romulus.oice.uni-erlangen.de/updatesite/
     ./ImageJ-linux64 --update update
     apt-get update && apt-get install -y -qq ffmpeg git vim > /dev/null
     cd $FIJI_HOME/jars
-    wget -q https://github.com/ome/omero-insight/releases/download/ v5.5.9/omero_ij-5.5.9-all.jar
+    wget -q https://github.com/ome/omero-insight/releases/download/v5.5.9/omero_ij-5.5.9-all.jar
     cd $FIJI_HOME/plugins
-    wget -q https://bitbucket.org/bene51/omero_3dscript/downloads/ 3D_Animation_Server-0.1.jar
+    wget -q https://bitbucket.org/bene51/omero_3dscript/downloads/3D_Animation_Server-0.1.jar
 ```
 * Install OMERO.3Dscript
 ```bash
