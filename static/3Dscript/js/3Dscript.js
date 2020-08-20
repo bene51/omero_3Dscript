@@ -122,7 +122,7 @@ var Model3Dscript = Backbone.Model.extend({
         var imageIds = this.jobs.map(function(s){return s.get('imageId')});
         console.debug(imageIds);
         $.ajax({
-            url: '/3Dscript/startRendering',
+            url: BASE_3DSCRIPT_URL + 'startRendering',
             data: {
                 imageId: imageIds,
                 script: script,
@@ -174,7 +174,7 @@ var Model3Dscript = Backbone.Model.extend({
                 return;
             }
             $.ajax({
-                url: '/3Dscript/getStateAndProgress',
+                url: BASE_3DSCRIPT_URL + 'getStateAndProgress',
                 data: {
                     basename: basename
                 },
@@ -235,7 +235,7 @@ var Model3Dscript = Backbone.Model.extend({
     cancelRendering: function(basenames) {
         var that = this;
         $.ajax({
-            url: '/3Dscript/cancelRendering',
+            url: BASE_3DSCRIPT_URL + 'cancelRendering',
             data: {
                 basename: basenames
             },

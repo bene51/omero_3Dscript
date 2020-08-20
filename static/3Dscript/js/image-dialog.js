@@ -152,7 +152,7 @@ var ImageView = Backbone.View.extend({
         var valid = true;
 
         $.ajax({
-            url: '/3Dscript/getImages',
+            url: BASE_3DSCRIPT_URL + 'getImages',
             data: {
                 image_id: imagesOrDatasets.images,
                 dataset_id: imagesOrDatasets.datasets,
