@@ -35,10 +35,7 @@ OMERO.3Dscript needs to be installed on the machine that runs OMERO.web.
 ```
 * Install OMERO.3Dscript
 ```bash
-    install_dir=`pip show omero-web | grep Location | cut -d' ' -f 2` # find out where OMERO.web is installed
-    cd $install_dir
-    git clone https://github.com/bene51/omero_3Dscript.git
-    pip install pid
+    pip install omero-3Dscript
 ```
 * Add it to the OMERO.web UI:
 ```bash
