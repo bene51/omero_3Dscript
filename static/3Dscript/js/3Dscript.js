@@ -123,6 +123,7 @@ var Model3Dscript = Backbone.Model.extend({
         console.debug(imageIds);
         $.ajax({
             url: BASE_3DSCRIPT_URL + 'startRendering',
+            method: 'POST',
             data: {
                 imageId: imageIds,
                 script: script,
@@ -236,6 +237,7 @@ var Model3Dscript = Backbone.Model.extend({
         var that = this;
         $.ajax({
             url: BASE_3DSCRIPT_URL + 'cancelRendering',
+            method: 'POST',
             data: {
                 basename: basenames
             },

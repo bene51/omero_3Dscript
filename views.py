@@ -1,4 +1,5 @@
 from omeroweb.webclient.decorators import login_required
+from django.views.decorators.http import require_POST
 from django.shortcuts import render
 from django.http import JsonResponse, HttpResponse
 import tempfile
@@ -62,19 +63,21 @@ def getStateAndProgress(request, conn=None, **kwargs):
      logger.info("return state: " + state)
      return JsonResponse(resp)
 
+@require_POST
 @login_required()
 def cancelRendering(request, conn=None, **kwargs):
      logger.info("cancelRendering")
-     basenames = request.GET.getlist('basename[]')
+     basenames = request.POST.getlist('basename[]')
      fiji.cancelRendering(basenames)
      return JsonResponse({})
 
+@require_POST
 @login_required()
 def startRendering(request, conn=None, **kwargs):
      """ Shows a subset of Z-planes for an image """
      try:
           basename = None
-          image_ids = request.GET.getlist('imageId[]')
+          image_ids = request.POST.getlist('imageId[]')
           # image_id = request.GET['imageId']
           image_names = []
           for image_id in image_ids:
@@ -84,10 +87,10 @@ def startRendering(request, conn=None, **kwargs):
               image_names.append(image.getName())
 
           user = conn.getUser().getName();
-          s = request.GET['script']
+          s = request.POST['script']
           sessionId = conn.c.getSessionId()
-          tgtWidth = request.GET['targetWidth']
-          tgtHeight = request.GET['targetHeight']
+          tgtWidth = request.POST['targetWidth']
+          tgtHeight = request.POST['targetHeight']
           # do not check the fiji path because we might use
           # the fiji on a different computer
           # fiji.checkFijiPath()
