@@ -35,4 +35,5 @@ setuptools.setup(
         'Topic :: Scientific/Engineering :: Visualization'
     ],
     python_requires='>=3',
+    include_package_data=True,
 )
