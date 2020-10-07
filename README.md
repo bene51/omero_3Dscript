@@ -45,4 +45,4 @@ OMERO.3Dscript needs to be installed on the machine that runs OMERO.web.
 
 Publication:
 ============
-Schmid, B.; Tripal, P. & Fraaß, T. et al. (2019), "[3Dscript: animating 3D/4D microscopy data using a natural-language-based syntax](https://www.nature.com/articles/s41592-019-0359-1)", _Nature methods_ **16(4)**: 278–280, PMID 30886414.
+Schmid, B.; Tripal, P. & Fraass, T. et al. (2019), "[3Dscript: animating 3D/4D microscopy data using a natural-language-based syntax](https://www.nature.com/articles/s41592-019-0359-1)", _Nature methods_ **16(4)**: 278-280, PMID 30886414.
