@@ -262,6 +262,7 @@ var AppView = Backbone.View.extend({
     events: {
         "click #render-button": "handleRenderButton",
         "click #cancel-button": "handleCancelButton",
+        "click #playall": "handlePlayallButton",
     },
 
     initialize: function() {
@@ -324,16 +325,24 @@ var AppView = Backbone.View.extend({
         this.model.cancelled = true;
     },
 
+    handlePlayallButton: function(event) {
+        $("video").trigger('play');
+    },
+
     render: function() {
         var renderbutton = $("#render-button");
         var cancelbutton = $("#cancel-button");
+        var playallbutton = $("#playall");
         var processing = this.model.get('processing');
         if(!processing) {
             cancelbutton.prop("disabled", true);
             renderbutton.prop("disabled", false);
+            if(this.model.jobs.length > 1)
+		playallbutton.show();
         } else {
             cancelbutton.prop("disabled", false);
             renderbutton.prop("disabled", true);
+            playallbutton.hide();
         }
     },
 });
