@@ -253,8 +253,24 @@ a.ui-button:active,
   color: gray;
 }
 
+#ref {
+  float: left;
+  bottom: 30px;
+  position: fixed;
+  min-width: 100px;
+  max-width: 150px;
+  width: 12vw;
+  display: block;
+  font-size: 0.8em;
+  text-decoration: none;
+  color: darkslategray;
+}
+
 @media screen and (max-width: 850px) {
   #logo {
+    display: none;
+  }
+  #ref {
     display: none;
   }
 }
