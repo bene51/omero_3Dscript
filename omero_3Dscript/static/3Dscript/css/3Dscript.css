@@ -232,6 +232,27 @@ a.ui-button:active,
   display: block;
 }
 
+#logo img {
+  width: 100%;
+  margin-bottom: 20px;
+}
+
+#logo svg {
+  display: inline-block;
+  font-size: inherit;
+  height: 1em;
+  overflow: visible;
+  vertical-align: -.125em;
+}
+
+#logo a {
+  display: block;
+  line-height: 2;
+  text-decoration: none;
+  font-family: Arial;
+  color: gray;
+}
+
 @media screen and (max-width: 850px) {
   #logo {
     display: none;
