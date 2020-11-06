@@ -520,6 +520,8 @@ var ResultView = Backbone.View.extend({
     var settingsbutton = $("#settings");
     var imagebutton = $("#imagebutton");
 
+    var heightSetByAutogrow = 0;
+
 
     /**
      * - Align the header text with the video and textarea
@@ -530,6 +532,7 @@ var ResultView = Backbone.View.extend({
         var left = ($(window).width() - 600) / 2.0;
         $("#header").css({"padding-left": left + "px"});
         appView.renderColumns();
+        initializeScriptAreaSize();
     }
 
     /**
@@ -545,7 +548,10 @@ var ResultView = Backbone.View.extend({
         var scriptHeight = bodyHeight - scriptY - buttonsHeight - footerHeight;
         var minHeight = 150;
         if(scriptHeight < minHeight)
-          scriptHeight = minHeight;
+            scriptHeight = minHeight;
+        $("#script").data('autogrow-start-height', scriptHeight);
+        if(heightSetByAutogrow > minHeight)
+            scriptHeight = heightSetByAutogrow;
 
         $("#script").height(scriptHeight)
     }
@@ -557,7 +563,6 @@ var ResultView = Backbone.View.extend({
         });
     
         onresize();
-        initializeScriptAreaSize();
 
         settingsbutton.on("click", function() {
             settingsView.showDialog();
@@ -626,7 +631,20 @@ var ResultView = Backbone.View.extend({
 	 * Make the script's textarea grow automatically to fill
 	 * the available (vertical) space.
 	 */
-        $("#script").autogrow();
+        var script = $("#script");
+        $("#script").autogrow({
+            animate: false
+        });
+        $(document).on('autogrow:grow', function(e) {
+            console.debug("autogrow: " + script.height());
+            heightSetByAutogrow = script.height();
+            window.scrollTo(0,document.body.scrollHeight);
+        });
+        $(document).on('autogrow:shrink', function(e) {
+            console.debug("autogrow: " + script.height());
+            heightSetByAutogrow = script.height();
+            window.scrollTo(0,document.body.scrollHeight);
+        });
 
         /*
 	 * The remainder deals with autocompletion.
