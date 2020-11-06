@@ -5,7 +5,7 @@ with open("README.md", "r") as fh:
 
 setuptools.setup(
     name="OMERO-3Dscript",
-    version="0.0.4",
+    version="0.0.5",
     author="Benjamin Schmid",
     author_email="bene.schmid@gmail.com",
     description="OMERO.web app to animate multi-dimensional microscopy using 3Dscript, directly from within the OMERO environment.",
