@@ -36,8 +36,9 @@ OMERO.3Dscript needs to be installed on the machine that runs OMERO.web.
 ```
 * Tell OMERO.3Dscript where to find Fiji
 ```bash
-    omero config set omero.web.omero_3Dscript.fiji_home "/usr/local/share/Fiji.app"
+    omero config set omero.web.omero_3Dscript.fiji_bin "/usr/local/share/Fiji.app/ImageJ-linux64"
 ```
+> :warning: On Mac OS X, you need to replace `ImageJ-linux64` with `Contents/MacOS/ImageJ-macosx` 
 
 * Add it to the OMERO.web UI:
 ```bash
