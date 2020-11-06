@@ -11,6 +11,9 @@ from . import omero_3Dscript_settings
 logger = logging.getLogger(__name__)
 
 def getFijiBin():
+	fijibin = omero_3Dscript_settings.OMERO_3DSCRIPT_FIJI_BIN
+	if fijibin is not None and os.path.isfile(fijibin):
+		return fijibin;
 	fijibin = os.getenv('FIJI_BIN')
 	if fijibin is not None and os.path.isfile(fijibin):
 		return fijibin;

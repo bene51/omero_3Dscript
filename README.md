@@ -34,6 +34,11 @@ OMERO.3Dscript needs to be installed on the machine that runs OMERO.web.
 ```bash
     pip install omero-3Dscript
 ```
+* Tell OMERO.3Dscript where to find Fiji
+```bash
+    omero config set omero.web.omero_3Dscript.fiji_home "/usr/local/share/Fiji.app"
+```
+
 * Add it to the OMERO.web UI:
 ```bash
     omero config append omero.web.apps '"omero_3Dscript"'
