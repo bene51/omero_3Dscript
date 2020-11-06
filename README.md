@@ -7,10 +7,10 @@ Usage:
 * Enter the animation text (see https://bene51.github.io/3Dscript/ for more details)
 * Click on 'Render'
 
-Requirements:
-=============
+Requirements for the server:
+============================
 * OpenCL capable graphics card
-* Updated drivers
+* Updated graphics drivers
 
 
 Installation:
@@ -28,7 +28,7 @@ OMERO.3Dscript needs to be installed on the machine that runs OMERO.web.
     ./ImageJ-linux64 --update add-update-site 3Dscript "https://romulus.oice.uni-erlangen.de/updatesite/"
     ./ImageJ-linux64 --update add-update-site 3Dscript-server "https://romulus.oice.uni-erlangen.de/imagej/updatesites/3Dscript-server/"
     ./ImageJ-linux64 --update update
-    apt-get update && apt-get install -y -qq ffmpeg git vim > /dev/null
+    apt-get update && apt-get install -y -qq ffmpeg > /dev/null
 ```
 * Install OMERO.3Dscript
 ```bash
@@ -42,6 +42,11 @@ OMERO.3Dscript needs to be installed on the machine that runs OMERO.web.
 ```
 
 * Restart OMERO.web as normal
+
+See also:
+=========
+* https://github.com/bene51/3Dscript
+* https://github.com/bene51/3Dscript.server
 
 Publication:
 ============
