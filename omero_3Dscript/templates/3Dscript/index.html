@@ -64,9 +64,18 @@ From frame 0 to frame 200 rotate by 360 degrees horizontally</textarea>
   <!-- new image dialog -->
   <div id="dialog-newimage" title="New image">
     <p class="validateTipsNewImage"> </p>
+    <p>Open new images to be rendered. You can</p>
+    <ul>
+	    <li>enter the OMERO IDs of one or more images,<br>
+            separated by comma.</li>
+        <li>enter the OMERO IDs of one or more datasets,<br>
+            separated by comma.</li>
+        <li>enter a link to images/datasets, by selecting<br>
+            them in the webclient, click the link in the <br>
+            right panel, copy it and paste it here.</li>
+    </ul>
     <form>
-      <label for="imageId">New image ID</label>
-      <input type="text" name="imageId" id="imageId" value="{{imageId}}" class="leftmargin number ui-widget-content ui-corner-all">
+      <input type="text" name="imageId" id="imageId" placeholder="Image/Dataset IDs or URL" value="{{imageId}}" class="ui-widget-content ui-corner-all">
     </form>
   </div>
 

@@ -24,6 +24,12 @@
 #dialog-newimage .leftmargin {
   margin-left: 8px;
 }
+#dialog-newimage input {
+  width: 100%;
+}
+#dialog-newimage ul li {
+  margin-top: 0.7em;
+}
 .ui-dialog.ui-widget {
   font-size: 0.8em;
 }
