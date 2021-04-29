@@ -1,5 +1,6 @@
 from omeroweb.webclient.decorators import login_required
 from django.views.decorators.http import require_POST
+from django.views.decorators.csrf import ensure_csrf_cookie
 from django.shortcuts import render
 from django.http import JsonResponse, HttpResponse
 import tempfile
@@ -31,6 +32,7 @@ def getImages(request, conn=None, **kwargs):
 
      return JsonResponse({'images': images})
 
+@ensure_csrf_cookie
 @login_required()
 def index(request, conn=None, **kwargs):
      """ Shows a subset of Z-planes for an image """
