@@ -52,6 +52,20 @@ OMERO.3Dscript needs to be installed on the machine that runs OMERO.web.
 
 * Restart OMERO.web as normal
 
+Enabling the public user
+------------------------
+If you want to grant the 'public user' the permission to render 3D animations using 3Dscript, you need to enable it as described [here](https://docs.openmicroscopy.org/omero/5.6.3/sysadmins/public.html):
+
+```bash
+omero config set omero.web.public.enabled True
+omero config set omero.web.public.user '<username>'
+omero config set omero.web.public.password '<password>'
+omero config set omero.web.public.url_filter '^/(webadmin/myphoto/|webclient/(?!(script_ui|ome_tiff|figure_script))|webgateway/(?!(archived_files|download_as))|iviewer|api|3Dscript)'
+omero config set omero.web.public.get_only false
+```
+    
+Pay attention to the last two lines.
+
 See also
 --------
 * https://github.com/bene51/3Dscript
