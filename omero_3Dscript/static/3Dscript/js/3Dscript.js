@@ -338,11 +338,15 @@ var AppView = Backbone.View.extend({
             cancelbutton.prop("disabled", true);
             renderbutton.prop("disabled", false);
             if(this.model.jobs.length > 1)
-		playallbutton.show();
+                playallbutton.show();
+            $("#roundprogress", "#videoContainer").hide();
+            $("#placeholdertext", "#videoContainer").show();
         } else {
             cancelbutton.prop("disabled", false);
             renderbutton.prop("disabled", true);
             playallbutton.hide();
+            $("#roundprogress", "#videoContainer").show();
+            $("#placeholdertext", "#videoContainer").hide();
         }
     },
 });
@@ -441,7 +445,8 @@ var ResultView = Backbone.View.extend({
         var vurl = this.model.get('resultVideoURL');
         var iurl = this.model.get('resultImageURL');
         var imageName = this.model.get('imageName');
-        var multiple = this.model.collection.length > 1;
+        var nChilds = this.model.collection.length;
+        var multiple = nChilds > 1;
         console.debug(this.el);
         var title = $("<div>")
             .addClass("title")
@@ -495,7 +500,30 @@ var ResultView = Backbone.View.extend({
                     '        d="M50 20' +
                     '           a 30 30 0 0 1 0 60' +
                     '           a 30 30 0 0 1 0 -60"/>\n' +
-                    '</svg>');
+                    '</svg>\n');
+                var largeSize = 4.2 / nChilds;
+                var smallSize = nChilds == 1 ? 1 : 0.7;
+                var phtext = $("<div>")
+                    .attr("id", "placeholdertext")
+                    .css("text-align", "center")
+                    .css("position", "absolute")
+                    .css("bottom", "40%")
+                    .css("width", "100%")
+                    .css("font-family", "Helvetica")
+                    .css("color", "wheat")
+                    .append(
+                        $("<p>")
+                            .css("font-size", largeSize + "em")
+                            .css("margin-block-start", "0")
+                            .css("margin-block-end", "0")
+                            .text("Coming soon"))
+                    .append(
+                        $("<p>")
+                            .css("font-size", smallSize + "em")
+                            .text("Please click the <Render> button."));
+                ph.append(phtext);
+                if(this.$el.index() > 0)
+                    phtext.hide(); // hide by default and only show it upon button press (render/cancel)
                 this.$el.empty();
                 if(multiple)
                     this.$el.append(title)
