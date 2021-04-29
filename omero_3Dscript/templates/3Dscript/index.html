@@ -7,7 +7,6 @@
   <title>3DScript</title>
   <script src="{% static '3Dscript/3rdparty/jquery-ui-1.12.1/external/jquery/jquery.js' %}"></script>
   <script src="{% static '3Dscript/3rdparty/jquery-ui-1.12.1/jquery-ui.min.js' %}"></script>
-  <script src="{% static 'webgateway/js/ome.csrf.js' %}"></script>
   <link rel="stylesheet" href="{% static '3Dscript/3rdparty/jquery-ui-1.12.1/jquery-ui.css' %}">
   <link rel="stylesheet" href="{% static '3Dscript/css/3Dscript.css' %}">
   <link rel="stylesheet" href="{% static '3Dscript/css/dialogs.css' %}">
@@ -113,6 +112,7 @@ From frame 0 to frame 200 rotate by 360 degrees horizontally</textarea>
   <script>
     var BASE_3DSCRIPT_URL = "{% url '3Dscript_index' %}";
   </script>
+  <script src="{% static '3Dscript/3rdparty/ome.csrf.js' %}"></script>
   <script src="{% static '3Dscript/3rdparty/textarea-caret-position.js' %}"></script>
   <script src="{% static '3Dscript/3rdparty/svg.min.js' %}"></script>
   <script src="{% static '3Dscript/3rdparty/underscore-1.9.1.min.js' %}"></script>
