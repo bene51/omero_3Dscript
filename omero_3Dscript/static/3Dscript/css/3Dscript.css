@@ -240,6 +240,7 @@ a.ui-button:active,
 #logo svg {
   display: inline-block;
   font-size: inherit;
+  width: 1em;
   height: 1em;
   overflow: visible;
   vertical-align: -.125em;
