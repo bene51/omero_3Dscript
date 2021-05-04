@@ -114,8 +114,8 @@ var Model3Dscript = Backbone.Model.extend({
         var that = this;
         this.cancelled = false;
         this.setNextToRender(0);
-        this.set('processing', true);
         this.resetResults();
+        this.set('processing', true);
         this.getJob(0).setStateAndProgress("STARTING", 2, null, -1);
         var targetWidth = this.get('outputWidth');
         var targetHeight = this.get('outputHeight');
