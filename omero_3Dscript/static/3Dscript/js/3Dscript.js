@@ -27,10 +27,9 @@ var ModelJob = Backbone.Model.extend({
         this.set('state', state);
         if(progress >= 0)
             this.set('progress', progress);
-        if(stacktrace != null)
-            this.set('stacktrace', stacktrace);
         if(position >= 0)
             this.set('position', position);
+        this.set('stacktrace', stacktrace);
     },
 });
 
@@ -361,6 +360,7 @@ var ProgressView = Backbone.View.extend({
             collapsible: true,
             active: false,
             animate: 200,
+            heightStyle: "content",
         });
     },
 
@@ -386,16 +386,16 @@ var ProgressView = Backbone.View.extend({
                     console.debug($("#backtrace"));
                 }
                 else
-                    $("#backtrace").append($("<pre></pre>").text(""));
-                this.$el.accordion("option", "active", 0);
+                    $("#backtrace").empty().append($("<pre></pre>").text(""));
                 this.$el.accordion("refresh");
+                this.$el.accordion("option", "active", 0);
             }
             else {
                 pbar.css({"background-color":"#4caf50"});
                 label.css({"color":"white"});
-                $("#backtrace").append($("<pre></pre>").text(""));
-                this.$el.accordion("option", "active", false);
+                $("#backtrace").empty().append($("<pre></pre>").text(""));
                 this.$el.accordion("refresh");
+                this.$el.accordion("option", "active", false);
             }
         }
     },
