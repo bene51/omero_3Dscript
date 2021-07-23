@@ -469,7 +469,7 @@ var ResultView = Backbone.View.extend({
             // var bodyHeight = $("body").height();
             // var scriptTop = $("#script").offset().top;
             // $("html").animate({scrollTop: scriptTop - bodyHeight}, 300);
-            $('html, body').animate({scrollTop: $(document).height()}, 500);
+            // $('html, body').animate({scrollTop: $(document).height()}, 500);
         }
         else if(type == 'image') {
             var img = $("<img>")
@@ -481,7 +481,7 @@ var ResultView = Backbone.View.extend({
             // var bodyHeight = $("body").height();
             // var scriptTop = $("#script").offset().top;
             // $("html").animate({scrollTop: scriptTop - bodyHeight}, 300);
-            $('html, body').animate({scrollTop: $(document).height()}, 500);
+            // $('html, body').animate({scrollTop: $(document).height()}, 500);
         }
         else if(type == 'none') {
             var ph = $("<div>");
@@ -532,7 +532,7 @@ var ResultView = Backbone.View.extend({
                 // var bodyHeight = $("body").height();
                 // var scriptTop = $("#script").offset().top;
                 // $("html").animate({scrollTop: scriptTop - bodyHeight}, 300);
-                $('html, body').animate({scrollTop: $(document).height()}, 500);
+                // $('html, body').animate({scrollTop: $(document).height()}, 500);
             }
         }
         return this;
