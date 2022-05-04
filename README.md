@@ -73,4 +73,6 @@ See also
 
 Publication
 -----------
-Schmid, B.; Tripal, P. & Fraass, T. et al. (2019), "[3Dscript: animating 3D/4D microscopy data using a natural-language-based syntax](https://www.nature.com/articles/s41592-019-0359-1)", _Nature methods_ **16(4)**: 278-280, PMID 30886414.
+Schmid B., Tripal P., Fraass T. & Palmisano R. (2019), "[3Dscript: animating 3D/4D microscopy data using a natural-language-based syntax](https://www.nature.com/articles/s41592-019-0359-1)", _Nature methods_ **16(4)**: 278-280, PMID 30886414.
+
+Schmid B., Tripal P., Winter Z. & Palmisano R. (2021), "[3Dscript.server: true server-side 3D animation of microscopy images using a natural language-based syntax](https://academic.oup.com/bioinformatics/article/37/24/4901/6307261)", _Bioinformatics_ **37(24)**: 4901-4902, PMID 34152405.
