@@ -204,7 +204,7 @@ var Model3Dscript = Backbone.Model.extend({
                         console.debug(job);
                         var type = data.type;
                         // var vurl = "/webclient/annotation/" + data.videoAnnotationId + "/";
-                        var vurl = "/3Dscript/getVideo?basename=" + encodeURIComponent(basename);
+                        var vurl = BASE_3DSCRIPT_URL + "getVideo?basename=" + encodeURIComponent(basename);
                         var iurl = "/webclient/annotation/" + data.imageAnnotationId + "/";
                         job.setResult(type, vurl, iurl);
                         job.setStateAndProgress('FINISHED', 100, null, 0);
